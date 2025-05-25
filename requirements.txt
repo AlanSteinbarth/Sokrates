@@ -1,0 +1,50 @@
+# =============================================================================
+# Sokrates - Cyfrowy Nauczyciel AI
+# Zależności Python dla projektu
+# =============================================================================
+
+# =============================================================================
+# GŁÓWNE ZALEŻNOŚCI
+# =============================================================================
+
+# Streamlit - Framework dla aplikacji webowych
+streamlit>=1.28.0,<2.0.0
+
+# OpenAI - Oficjalne SDK dla API OpenAI
+openai>=1.0.0,<2.0.0
+
+# Python-dotenv - Zarządzanie zmiennymi środowiskowymi
+python-dotenv>=1.0.0,<2.0.0
+
+# =============================================================================
+# ZALEŻNOŚCI POMOCNICZE
+# =============================================================================
+
+# Pathlib już jest w standardowej bibliotece Python 3.4+
+# JSON już jest w standardowej bibliotece Python
+# Typing już jest w standardowej bibliotece Python 3.5+
+
+# =============================================================================
+# OPCJONALNE ZALEŻNOŚCI (dla rozwoju)
+# =============================================================================
+
+# Development dependencies (odkomentuj jeśli potrzebne)
+# pytest>=7.0.0               # Testy jednostkowe
+# black>=22.0.0                # Formatowanie kodu
+# flake8>=5.0.0               # Linting
+# mypy>=1.0.0                 # Type checking
+# pre-commit>=2.20.0          # Git hooks
+
+# =============================================================================
+# INFORMACJE O WERSJACH
+# =============================================================================
+# Sprawdzone wersje:
+# - Python: 3.8, 3.9, 3.10, 3.11, 3.12
+# - Streamlit: 1.28.x, 1.29.x, 1.30.x
+# - OpenAI: 1.x.x (najnowsza stabilna)
+# 
+# Minimalne wymagania:
+# - Python >= 3.8
+# - 512 MB RAM
+# - Połączenie internetowe (dla API OpenAI)
+# =============================================================================

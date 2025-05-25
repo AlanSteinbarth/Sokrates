@@ -1,0 +1,308 @@
+# =============================================================================
+# Sokrates - Cyfrowy Nauczyciel AI
+# .gitignore dla projektu Python/Streamlit
+# =============================================================================
+
+# =============================================================================
+# DANE UŻYTKOWNIKÓW I KONFIGURACJA
+# =============================================================================
+# Pliki konfiguracyjne z kluczami API
+.env
+.env.local
+.env.*.local
+
+# Lokalna baza danych z profilami uczniów (RODO compliance)
+db/students/*.json
+db/conversations/*.json
+db/memory.json
+db/current.json
+
+# Backupy i pliki tymczasowe
+*.backup
+*.bak
+*.tmp
+*.temp
+
+# =============================================================================
+# PYTHON
+# =============================================================================
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Flask stuff:
+instance/
+.webassets-cache
+
+# Scrapy stuff:
+.scrapy
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+.pybuilder/
+target/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+.python-version
+
+# pipenv
+Pipfile.lock
+
+# poetry
+poetry.lock
+
+# pdm
+.pdm.toml
+
+# PEP 582
+__pypackages__/
+
+# Celery stuff
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# pytype static type analyzer
+.pytype/
+
+# Cython debug symbols
+cython_debug/
+
+# PyCharm
+.idea/
+
+# =============================================================================
+# STREAMLIT
+# =============================================================================
+# Streamlit cache
+.streamlit/
+
+# =============================================================================
+# SYSTEM FILES
+# =============================================================================
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# =============================================================================
+# DEVELOPMENT TOOLS
+# =============================================================================
+# VS Code
+.vscode/
+*.code-workspace
+
+# Sublime Text
+*.tmlanguage.cache
+*.tmPreferences.cache
+*.stTheme.cache
+*.sublime-workspace
+*.sublime-project
+
+# Vim
+*~
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# =============================================================================
+# LOGS I DEBUGGING
+# =============================================================================
+*.log
+logs/
+debug.log
+error.log
+access.log
+
+# =============================================================================
+# PLIKI TESTOWE I TYMCZASOWE
+# =============================================================================
+# Test files
+test_*.py
+*_test.py
+tests/temp/
+temp/
+tmp/
+
+# Jupyter notebooks (jeśli używane do eksperymentów)
+*.ipynb
+
+# =============================================================================
+# DOKUMENTACJA TYMCZASOWA
+# =============================================================================
+# Temporary documentation files
+docs/temp/
+*.draft.md
+
+# =============================================================================
+# INNE
+# =============================================================================
+# Node.js (gdyby były używane narzędzia frontendowe)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Archives
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# =============================================================================
+# DEVELOPMENT NOTES
+# =============================================================================
+# Keep important folders but ignore their contents
+db/students/.gitkeep
+db/conversations/.gitkeep
+
+# Ensure these files are tracked
+!.gitignore
+!README.md
+!requirements.txt
+!app.py
+!.env.example
+!LICENSE
+!CONTRIBUTING.md
+!CHANGELOG.md
