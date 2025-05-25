@@ -13,6 +13,21 @@ a projekt stosuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Dashboard z statystykami postępów
 - Tryb offline z podstawową funkcjonalnością
 
+## [2.1.0] - 2025-05-25
+
+### Dodane
+- **GitHub Actions CI/CD**: Automatyczne testy jakości kodu, bezpieczeństwa i deploju
+- **Issue Templates**: Profesjonalne szablony dla bug reportów, feature requestów i pytań
+- **Pull Request Template**: Standardowy szablon dla pull requestów
+- **Security Policy**: Instrukcje zgłaszania luk bezpieczeństwa
+- **Code of Conduct**: Kodeks postępowania dla społeczności
+- **Automatyczne release**: GitHub Actions tworzące automatyczne wydania
+
+### Ulepszone
+- **CI/CD Pipeline**: Pełna automatyzacja testów i kontroli jakości
+- **Dokumentacja**: Profesjonalne templates dla współpracy open-source
+- **Bezpieczeństwo**: Skanowanie zależności i kodu pod kątem vulnerabilities
+
 ## [2.0.0] - 2025-05-25
 
 ### Dodane
