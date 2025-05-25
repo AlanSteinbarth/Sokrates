@@ -3,7 +3,7 @@
 # =============================================================================
 # Autor: Alan Steinbarth (alan.steinbarth@gmail.com)
 # GitHub: https://github.com/AlanSteinbarth/Sokrates
-# Wersja: 2.0.0
+# Wersja: 2.1.0
 # Licencja: MIT
 # 
 # Aplikacja wykorzystująca metodę sokratejską do nauczania przez pytania
