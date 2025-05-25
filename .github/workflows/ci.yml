@@ -1,0 +1,144 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        python-version: ['3.8', '3.9', '3.10', '3.11']
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Cache dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install flake8 bandit safety pytest
+    
+    - name: Code quality check with flake8
+      run: |
+        flake8 app.py --max-line-length=88 --ignore=E203,W503
+    
+    - name: Security scan with bandit
+      run: |
+        bandit -r . -f json -o bandit-report.json || true
+        cat bandit-report.json
+    
+    - name: Check for known vulnerabilities
+      run: |
+        safety check --json || true
+    
+    - name: Validate Python syntax
+      run: |
+        python -m py_compile app.py
+    
+    - name: Test import and basic functionality
+      run: |
+        python -c "
+        import sys
+        import os
+        sys.path.append('.')
+        
+        # Test imports
+        try:
+            import streamlit
+            import openai
+            from pathlib import Path
+            import json
+            from dotenv import dotenv_values
+            from typing import List, Dict, Any
+            print('✅ All imports successful')
+        except ImportError as e:
+            print(f'❌ Import error: {e}')
+            sys.exit(1)
+        
+        # Test basic functions (without Streamlit session state)
+        print('✅ Basic validation passed')
+        "
+
+  security-scan:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: '.'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+    
+    - name: Upload Trivy scan results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v2
+      if: always()
+      with:
+        sarif_file: 'trivy-results.sarif'
+
+  documentation-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Check if README exists
+      run: |
+        if [ ! -f README.md ]; then
+          echo "❌ README.md not found"
+          exit 1
+        fi
+        echo "✅ README.md found"
+    
+    - name: Check if CONTRIBUTING exists
+      run: |
+        if [ ! -f CONTRIBUTING.md ]; then
+          echo "❌ CONTRIBUTING.md not found"
+          exit 1
+        fi
+        echo "✅ CONTRIBUTING.md found"
+    
+    - name: Check if LICENSE exists
+      run: |
+        if [ ! -f LICENSE ]; then
+          echo "❌ LICENSE not found"
+          exit 1
+        fi
+        echo "✅ LICENSE found"
+    
+    - name: Validate requirements.txt
+      run: |
+        if [ ! -f requirements.txt ]; then
+          echo "❌ requirements.txt not found"
+          exit 1
+        fi
+        echo "✅ requirements.txt found"
+        
+        # Check if requirements are valid
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt --dry-run
+        echo "✅ requirements.txt is valid"

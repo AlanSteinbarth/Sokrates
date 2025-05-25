@@ -1,0 +1,101 @@
+name: 💡 Propozycja funkcji
+description: Zaproponuj nową funkcję dla Sokratesa
+title: "[FEATURE] "
+labels: ["enhancement"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Dziękuję za propozycję! Nowe pomysły pomagają rozwijać Sokratesa.
+
+  - type: textarea
+    id: feature-description
+    attributes:
+      label: Opis funkcji
+      description: Opisz dokładnie jaką funkcję chciałbyś dodać
+      placeholder: |
+        Przykład: Chciałbym, żeby Sokrates mógł uczyć również języków obcych. 
+        Użytkownik mógłby wybrać język (angielski, niemiecki, francuski) i Sokrates 
+        zadawałby pytania w tym języku, pomagając w nauce.
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem-solved
+    attributes:
+      label: Jaki problem to rozwiązuje?
+      description: Opisz dlaczego ta funkcja jest potrzebna
+      placeholder: |
+        Obecnie Sokrates uczy tylko w języku polskim, ale wielu użytkowników 
+        chciałoby uczyć się przedmiotów w językach obcych...
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: Proponowane rozwiązanie
+      description: Jak widzisz implementację tej funkcji?
+      placeholder: |
+        1. Dodanie wyboru języka na ekranie logowania
+        2. Modyfikacja promptów AI dla różnych języków
+        3. Wielojęzyczne FAQ i interfejs
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatywne rozwiązania
+      description: Czy rozważałeś inne sposoby rozwiązania tego problemu?
+      placeholder: Można by też...
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priorytet
+      description: Jak ważna jest ta funkcja?
+      options:
+        - "Miło mieć (Nice to have)"
+        - "Średni priorytet"
+        - "Wysoki priorytet" 
+        - "Krytyczna funkcja"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: difficulty
+    attributes:
+      label: Szacunkowa trudność implementacji
+      description: Jak trudna wydaje Ci się implementacja?
+      options:
+        - "Nie wiem"
+        - "Łatwa (kilka godzin)"
+        - "Średnia (kilka dni)"
+        - "Trudna (kilka tygodni)"
+        - "Bardzo trudna (miesiące)"
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Dodatkowy kontekst
+      description: Czy masz jakieś dodatkowe informacje, linki, przykłady?
+      placeholder: |
+        - Podobne rozwiązania w innych aplikacjach
+        - Linki do dokumentacji
+        - Mockupy interfejsu
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Sprawdziłem
+      description: Przed zgłoszeniem upewnij się, że
+      options:
+        - label: Przeszukałem istniejące issues czy ta funkcja już nie została zaproponowana
+          required: true
+        - label: Ta funkcja pasuje do filozofii Sokratesa (metoda sokratejska)
+          required: true
+        - label: Jestem gotów pomóc w testowaniu tej funkcji
+          required: false

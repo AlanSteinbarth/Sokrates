@@ -1,0 +1,110 @@
+name: 🐛 Zgłoszenie błędu
+description: Zgłoś błąd w aplikacji Sokrates
+title: "[BUG] "
+labels: ["bug", "needs-triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Dziękuję za zgłoszenie błędu! To pomoże ulepszyć Sokratesa dla wszystkich użytkowników.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: Opis problemu
+      description: Opisz dokładnie co się dzieje i czego się spodziewałeś
+      placeholder: |
+        Przykład: Sokrates nie odpowiada na pytania o matematykę. Gdy zadaję pytanie "Ile to 2+2?", 
+        aplikacja wyświetla błąd zamiast zadać pytanie prowadzące.
+      value: "Błąd występuje gdy..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Kroki do odtworzenia
+      description: "Jak można odtworzyć ten błąd?"
+      placeholder: |
+        1. Zaloguj się jako "Anna"
+        2. Zadaj pytanie "Ile to 2+2?"
+        3. Napisz "nie wiem" 3 razy
+        4. Błąd pojawia się...
+      value: |
+        1. 
+        2. 
+        3. 
+        4. 
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Oczekiwane zachowanie
+      description: Opisz co powinno się stać
+      placeholder: Sokrates powinien zadać pytanie prowadzące...
+    validations:
+      required: true
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots
+      description: Jeśli to pomaga, dodaj screenshoty
+      placeholder: Przeciągnij i upuść obrazy tutaj
+
+  - type: input
+    id: version
+    attributes:
+      label: Wersja aplikacji
+      description: Jaka wersja Sokratesa?
+      placeholder: "v2.0.0"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: browsers
+    attributes:
+      label: Przeglądarka
+      description: W jakiej przeglądarce występuje problem?
+      options:
+        - Chrome
+        - Firefox
+        - Safari
+        - Edge
+        - Opera
+        - Inna
+    validations:
+      required: true
+
+  - type: input
+    id: os
+    attributes:
+      label: System operacyjny
+      description: Jaki system operacyjny używasz?
+      placeholder: "Windows 11, macOS 14, Ubuntu 22.04, itp."
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logi błędów
+      description: Jeśli widzisz błędy w konsoli lub terminalu, wklej je tutaj
+      render: shell
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Sprawdziłem
+      description: Przed zgłoszeniem upewnij się, że
+      options:
+        - label: Przeszukałem istniejące issues czy ten problem już nie został zgłoszony
+          required: true
+        - label: Problem występuje w najnowszej wersji Sokratesa
+          required: true
+        - label: Sprawdziłem czy mam prawidłowo skonfigurowany klucz OpenAI API
+          required: false

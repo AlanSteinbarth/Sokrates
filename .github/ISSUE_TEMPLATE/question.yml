@@ -1,0 +1,89 @@
+name: ❓ Pytanie lub pomoc
+description: Masz pytanie o użytkowanie Sokratesa?
+title: "[QUESTION] "
+labels: ["question", "help wanted"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Masz pytanie o Sokratesa? Chętnie pomożemy! 
+        
+        **Sprawdź najpierw:**
+        - [README.md](../README.md) - instrukcje instalacji i użytkowania
+        - [FAQ w aplikacji](../README.md#-najczęściej-zadawane-pytania) - odpowiedzi na popularne pytania
+        - [Istniejące issues](https://github.com/AlanSteinbarth/Sokrates/issues) - może ktoś już zadał podobne pytanie
+
+  - type: dropdown
+    id: question-type
+    attributes:
+      label: Typ pytania
+      description: Jakiego rodzaju jest Twoje pytanie?
+      options:
+        - "Instalacja i konfiguracja"
+        - "Użytkowanie aplikacji"
+        - "Metoda sokratejska - jak działa"
+        - "Profile uczniów i pamięć"
+        - "Problemy z OpenAI API"
+        - "Bezpieczeństwo i RODO"
+        - "Inne"
+    validations:
+      required: true
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Twoje pytanie
+      description: Opisz szczegółowo czego się chcesz dowiedzieć
+      placeholder: |
+        Przykład: Jak mogę zmienić model OpenAI z gpt-4o-mini na gpt-4o? 
+        Czy to wpłynie na jakość odpowiedzi Sokratesa?
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Kontekst
+      description: Opisz co próbujesz osiągnąć lub jaka jest Twoja sytuacja
+      placeholder: |
+        Przykład: Jestem nauczycielem matematyki i chcę używać Sokratesa z uczniami. 
+        Potrzebuję lepszej jakości odpowiedzi, nawet za wyższą cenę.
+
+  - type: textarea
+    id: tried
+    attributes:
+      label: Co już próbowałeś?
+      description: Jakie kroki już podjąłeś żeby rozwiązać problem?
+      placeholder: |
+        - Przeczytałem README.md
+        - Sprawdziłem konfigurację .env
+        - Próbowałem...
+
+  - type: input
+    id: version
+    attributes:
+      label: Wersja aplikacji
+      description: Jaka wersja Sokratesa?
+      placeholder: "v2.0.0"
+
+  - type: input
+    id: os
+    attributes:
+      label: System operacyjny
+      description: Jaki system operacyjny używasz?
+      placeholder: "Windows 11, macOS 14, Ubuntu 22.04, itp."
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Sprawdziłem
+      description: Przed zadaniem pytania upewnij się, że
+      options:
+        - label: Przeczytałem README.md i FAQ
+          required: true
+        - label: Przeszukałem istniejące issues czy to pytanie już nie było zadane
+          required: true
+        - label: To pytanie dotyczy Sokratesa (nie ogólnego programowania)
+          required: true

@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 📚 Dokumentacja
+    url: https://github.com/AlanSteinbarth/Sokrates/blob/main/README.md
+    about: Przeczytaj pełną dokumentację projektu
+  - name: 💬 Dyskusje
+    url: https://github.com/AlanSteinbarth/Sokrates/discussions
+    about: Zadaj pytanie lub rozpocznij dyskusję o rozwoju Sokratesa
+  - name: 📧 Kontakt z autorem
+    url: mailto:alan.steinbarth@gmail.com
+    about: Napisz bezpośrednio do autora projektu
