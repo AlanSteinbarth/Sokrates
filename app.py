@@ -40,8 +40,43 @@ USD_TO_PLN = 3.92  # Aktualny kurs USD->PLN (aktualizować okresowo)
 PRICING = model_pricings[MODEL]
 
 # Inicjalizacja klienta OpenAI
-env = dotenv_values(".env")
-openai_client = OpenAI(api_key=env["OPENAI_API_KEY"])
+
+def get_api_key() -> str:
+    """
+    Pobiera klucz OpenAI API z sesji, pliku .env lub zwraca pusty string.
+    Preferuje klucz wpisany przez użytkownika w sidebarze.
+    """
+    # Najpierw sprawdź czy klucz jest w session_state (wprowadzony przez użytkownika)
+    if "openai_api_key" in st.session_state and st.session_state["openai_api_key"]:
+        return st.session_state["openai_api_key"]
+    # Następnie sprawdź plik .env
+    env = dotenv_values(".env")
+    value = env.get("OPENAI_API_KEY", "")
+    return value if value is not None else ""
+
+def verify_api_key(api_key: str) -> bool:
+    """
+    Weryfikuje poprawność klucza OpenAI API przez próbę wykonania prostego zapytania.
+    Zwraca True jeśli klucz jest poprawny, False w przeciwnym razie.
+    """
+    try:
+        client = OpenAI(api_key=api_key)
+        # Minimalne zapytanie do modelu (bardzo krótka wiadomość)
+        response = client.chat.completions.create(
+            model=MODEL,
+            messages=[{"role": "user", "content": "ping"}]
+        )
+        return bool(response.choices[0].message.content)
+    except Exception:
+        return False
+
+# Inicjalizacja klienta OpenAI (dynamicznie na podstawie klucza)
+def get_openai_client() -> OpenAI:
+    """
+    Tworzy klienta OpenAI na podstawie aktualnego klucza API (z sidebaru lub .env).
+    """
+    api_key = get_api_key()
+    return OpenAI(api_key=api_key)
 
 # =============================================================================
 # ZARZĄDZANIE PROFILAMI UCZNIÓW
@@ -88,10 +123,10 @@ def zapisz_do_pamieci(fact: str) -> None:
         Funkcja sprawdza czy uczeń jest zalogowany przed zapisem.
         Każdy fakt jest zapisywany jako osobna linia JSON.
     """
-    if "student_name" not in st.session_state or not st.session_state["student_name"]:
+    if "student_name" not in st.session_state or not st.session_state.get("student_name", ""):
         return
     
-    memory_file = get_student_memory_file(st.session_state["student_name"])
+    memory_file = get_student_memory_file(st.session_state.get("student_name", ""))
     memory_file.parent.mkdir(exist_ok=True)
     
     with open(memory_file, "a", encoding="utf-8") as f:
@@ -107,16 +142,16 @@ def wczytaj_pamiec() -> List[str]:
     Note:
         Zwraca pustą listę jeśli uczeń nie jest zalogowany lub brak pliku.
     """
-    if "student_name" not in st.session_state or not st.session_state["student_name"]:
+    if "student_name" not in st.session_state or not st.session_state.get("student_name", ""):
         return []
     
-    memory_file = get_student_memory_file(st.session_state["student_name"])
+    memory_file = get_student_memory_file(st.session_state.get("student_name", ""))
     if not memory_file.exists():
         return []
     
     try:
         with open(memory_file, "r", encoding="utf-8") as f:
-            return [json.loads(l.strip())["fact"] for l in f.readlines() if l.strip()]
+            return [json.loads(line.strip())["fact"] for line in f.readlines() if line.strip()]
     except (json.JSONDecodeError, KeyError):
         return []
 
@@ -130,10 +165,10 @@ def zapisz_pamiec(fakty: List[str]) -> None:
     Note:
         Używane przy edycji/usuwaniu faktów z profilu.
     """
-    if "student_name" not in st.session_state or not st.session_state["student_name"]:
+    if "student_name" not in st.session_state or not st.session_state.get("student_name", ""):
         return
     
-    memory_file = get_student_memory_file(st.session_state["student_name"])
+    memory_file = get_student_memory_file(st.session_state.get("student_name", ""))
     memory_file.parent.mkdir(exist_ok=True)
     
     with open(memory_file, "w", encoding="utf-8") as f:
@@ -176,7 +211,8 @@ def wyciagnij_fakty_z_tekstu(text: str) -> List[str]:
         Wykorzystuje model GPT do inteligentnej analizy stylu nauki.
     """
     try:
-        response = openai_client.chat.completions.create(
+        client = get_openai_client()
+        response = client.chat.completions.create(
             model=MODEL,
             messages=[
                 {"role": "system", "content": """Wydobądź z tekstu fakty o uczniu, które warto zapamiętać dla procesu nauczania:
@@ -190,12 +226,10 @@ Wypisz jako listę wypunktowaną, krótko i konkretnie."""},
                 {"role": "user", "content": text}
             ]
         )
-        
         content = response.choices[0].message.content
         if content is None:
             return []
         return [line.strip() for line in content.split("\n") if line.strip()]
-        
     except Exception as e:
         st.error(f"Błąd podczas analizy tekstu: {e}")
         return []
@@ -262,99 +296,73 @@ Profil ucznia: {memory_context}
     ]
 
     try:
-        # Wywołanie API OpenAI
-        response = openai_client.chat.completions.create(
+        client = get_openai_client()
+        response = client.chat.completions.create(
             model=MODEL,
             messages=messages,
-            temperature=0.7,  # Balans między kreatywnością a spójnością
-            max_tokens=500    # Limit długości odpowiedzi
+            stream=False
         )
-        
-        # Zbieranie statystyk użycia
-        usage = {}
-        if response.usage:
-            usage = {
-                "completion_tokens": response.usage.completion_tokens,
-                "prompt_tokens": response.usage.prompt_tokens,
-                "total_tokens": response.usage.total_tokens,
-            }
-
+        # Zwracamy tylko najważniejsze dane jako dict
         return {
-            "role": "assistant",
-            "content": response.choices[0].message.content,
-            "usage": usage,
+            "content": response.choices[0].message.content if response.choices else "",
+            "usage": getattr(response, "usage", None),
+            "raw": response
         }
-        
     except Exception as e:
         st.error(f"Błąd podczas komunikacji z AI: {e}")
-        return {
-            "role": "assistant",
-            "content": "Przepraszam, wystąpił problem z połączeniem. Spróbuj ponownie.",
-            "usage": {}
-        }
+        return {"content": "", "usage": None, "raw": None}
 
-# =============================================================================
-# INICJALIZACJA STREAMLIT I STANU SESJI
-# =============================================================================
-# Inicjalizacja wszystkich zmiennych stanu sesji Streamlit
-# UWAGA: Te inicjalizacje MUSZĄ być na początku, przed jakimkolwiek UI!
+# ===============================
+# SIDEBAR: WPROWADZANIE KLUCZA API
+# ===============================
+with st.sidebar:
+    st.header("🔑 OpenAI API Key")
+    api_key_input = st.text_input(
+        "Podaj swój OpenAI API Key",
+        type="password",
+        value=st.session_state.get("openai_api_key", ""),
+        help="Wprowadź swój klucz OpenAI API lub dodaj go do pliku .env jako OPENAI_API_KEY. Klucz jest wymagany do działania aplikacji."
+    )
+    st.session_state["openai_api_key"] = api_key_input
+    api_key_status = ""
+    prev_verified = st.session_state.get("api_key_verified", False)
+    if api_key_input:
+        if verify_api_key(api_key_input):
+            api_key_status = "✅ Klucz API jest prawidłowy. Możesz korzystać z aplikacji."
+            st.success(api_key_status)
+            st.session_state["api_key_verified"] = True
+            if not prev_verified:
+                st.rerun()
+        else:
+            api_key_status = "❌ Klucz API jest nieprawidłowy lub wygasł."
+            st.error(api_key_status)
+            st.session_state["api_key_verified"] = False
+    else:
+        st.info("Podaj swój klucz OpenAI API lub dodaj go do pliku .env.")
+        st.session_state["api_key_verified"] = False
 
-if "messages" not in st.session_state:
-    st.session_state["messages"] = []
+# ===============================
+# BLOKADA FUNKCJI DO CZASU WERYFIKACJI KLUCZA
+# ===============================
+if not st.session_state.get("api_key_verified", False):
+    st.markdown("""
+    <h2 style='text-align: center;'>🧠 Sokrates - Twój cyfrowy nauczyciel</h2>
+    <div style='text-align: center;'>
+        <p>Odkrywaj wiedzę z pomocą AI, która prowadzi Cię pytaniami – ucz się skuteczniej, myśl samodzielnie i rozwijaj swój potencjał!</p>
+    </div>
+    """, unsafe_allow_html=True)
+    st.stop()
 
-if "facts_to_confirm" not in st.session_state:
-    st.session_state["facts_to_confirm"] = []
-
-if "student_name" not in st.session_state:
-    st.session_state["student_name"] = ""
-
-if "nie_wiem_counter" not in st.session_state:
-    st.session_state["nie_wiem_counter"] = 0
-
-if "current_topic" not in st.session_state:
-    st.session_state["current_topic"] = None
-
-if "show_faq" not in st.session_state:
-    st.session_state["show_faq"] = False
-
-if "chatbot_personality" not in st.session_state:
-    st.session_state["chatbot_personality"] = """Jesteś Sokratesem - mądrym filozofem i nauczycielem. 
-Twoim celem jest pomóc uczniowi w nauce przez zadawanie pytań prowadzących.
-
-ZASADY METODY SOKRATEJSKIEJ:
-1. Normalnie NIE udzielaj bezpośrednich odpowiedzi - zadawaj pytania prowadzące
-2. Zadawaj pytania, które pomagają uczniowi myśleć i dochodzić do wniosków
-3. Gdy licznik "nie wiem" osiągnie 4 - MUSISZ udzielić jasnej, konkretnej odpowiedzi
-4. Po udzieleniu odpowiedzi, wyjaśnij dlaczego ta odpowiedź jest prawidłowa
-5. Bądź cierpliwy, zachęcający i mądry
-6. Gratuluj gdy uczeń dochodzi do prawidłowych wniosków samodzielnie
-7. Dostosowuj poziom trudności pytań do profilu ucznia"""
-
-# =============================================================================
-# GŁÓWNY INTERFEJS UŻYTKOWNIKA
-# =============================================================================
-
-# Konfiguracja strony Streamlit
-st.set_page_config(
-    page_title="Sokrates - Cyfrowy Nauczyciel",
-    page_icon="🧠",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
-
-# Nagłówek główny aplikacji
-st.title("🧠 Sokrates - Twój cyfrowy nauczyciel")
-st.markdown("""
-*"Wiem, że nic nie wiem"* - Sokrates
-
-Witaj w aplikacji, która uczy metodą sokratejską! 
-""")
-
-# =============================================================================
-# SEKCJA LOGOWANIA UCZNIÓW
-# =============================================================================
-if not st.session_state["student_name"]:
-    st.subheader("👤 Zaloguj się")
+# ===============================
+# LOGOWANIE UCZNIA I INTERFEJS GŁÓWNY
+# ===============================
+if not st.session_state.get("student_name", ""):
+    st.markdown("""
+    <h2 style='text-align: center;'>🧠 Sokrates - Twój cyfrowy nauczyciel</h2>
+    <div style='text-align: center;'>
+        <p>Podaj swoje imię, aby rozpocząć naukę metodą sokratejską!</p>
+    </div>
+    """, unsafe_allow_html=True)
     col1, col2 = st.columns([3, 1])
     with col1:
         student_input = st.text_input("Podaj swoje imię:", placeholder="np. Anna, Tomek...")
@@ -364,93 +372,44 @@ if not st.session_state["student_name"]:
             st.session_state["messages"] = []  # Reset rozmowy dla nowego ucznia
             st.session_state["nie_wiem_counter"] = 0
             st.rerun()
-    
-    # FAQ dla niezalogowanych
     if st.button("❓ Jak to działa?"):
-        st.session_state["show_faq"] = not st.session_state["show_faq"]
-    
-    if st.session_state["show_faq"]:
+        st.session_state["show_faq"] = not st.session_state.get("show_faq", False)
+    if st.session_state.get("show_faq", False):
         st.subheader("❓ Najczęściej zadawane pytania")
-        
         with st.expander("🤔 Jak działa metoda sokratejska?"):
             st.write("""
             **Metoda sokratejska** to sposób uczenia przez zadawanie pytań prowadzących, zamiast podawania gotowych odpowiedzi.
-            
-            **Jak to działa:**
             1. Zadajesz pytanie Sokratesowi
-            2. Zamiast odpowiedzi, otrzymujesz pytania, które mają Cię naprowadzić na właściwą odpowiedź
+            2. Otrzymujesz pytania, które mają Cię naprowadzić na odpowiedź
             3. Próbujesz odpowiadać na te pytania
-            4. Przez ten proces sam dochodzisz do prawidłowej odpowiedzi!
+            4. Samodzielnie dochodzisz do rozwiązania!
             """)
-        
         with st.expander("❓ Co oznacza 'nie wiem' i licznik?"):
             st.write("""
-            **Licznik "nie wiem"** to system pomocy:
-            
-            - **0-2 razy:** Sokrates zadaje tylko pytania prowadzące
-            - **3 razy:** Otrzymujesz wskazówki i częściowe odpowiedzi  
-            - **4+ razy:** Otrzymujesz pełną odpowiedź z wyjaśnieniem
-            
-            **Jak używać:**
-            - Gdy naprawdę nie wiesz jak odpowiedzieć, napisz "nie wiem"
-            - Możesz też kliknąć przycisk "Udziel odpowiedzi teraz" aby przeskoczyć do pełnej odpowiedzi
+            **Licznik 'nie wiem'** to system pomocy:
+            - 0-2 razy: pytania prowadzące
+            - 3 razy: wskazówki i częściowe odpowiedzi
+            - 4+ razy: pełna odpowiedź z wyjaśnieniem
             """)
-        
         with st.expander("👤 Co to jest profil ucznia?"):
             st.write("""
             **Profil ucznia** to Twoja osobista karta nauki, która zawiera:
-            
-            - Poziom wiedzy w różnych dziedzinach
+            - Poziom wiedzy
             - Sposób, w jaki najlepiej się uczysz
             - Trudności, z jakimi się zmagasz
             - Postępy w nauce
             - Zainteresowania naukowe
-            
-            Sokrates wykorzystuje te informacje, aby dostosować pytania i metody nauczania do Twoich potrzeb.
             """)
-        
-        with st.expander("🎯 Jak działa profil nauki?"):
-            st.write("""
-            **Profil nauki** automatycznie zapisuje informacje o Tobie podczas rozmów:
-            
-            1. **Automatyczne wykrywanie:** System analizuje Twoje odpowiedzi i wydobywa ważne fakty
-            2. **Potwierdzanie:** Możesz zatwierdzić, które informacje chcesz zapisać
-            3. **Personalizacja:** Sokrates dostosowuje swoje pytania na podstawie Twojego profilu
-            4. **Postęp:** Możesz śledzić swój rozwój w czasie
-            """)
-        
-        with st.expander("🔒 Jak przechowywane są moje dane? (RODO)"):
-            st.write("""
-            **Ochrona Twoich danych osobowych:**
-            
-            - **Lokalne przechowywanie:** Wszystkie Twoje dane są zapisywane lokalnie na Twoim komputerze w folderze `db/students/`
-            - **Brak wysyłania:** Dane nie są wysyłane na żadne zewnętrzne serwery (poza zapytaniami do OpenAI z Twoimi pytaniami)
-            - **Kontrola:** Masz pełną kontrolę nad swoimi danymi - możesz je przeglądać, edytować i usuwać
-            - **Plik profilu:** Twój profil jest zapisany jako `{twoje_imie}_memory.json` w folderze `db/students/`
-            - **Usuwanie danych:** Możesz usunąć swój profil całkowicie, kasując odpowiedni plik
-            
-            **Co jest zapisywane:**
-            - Poziom wiedzy w różnych dziedzinach
-            - Sposób uczenia się i preferencje
-            - Trudności w nauce i postępy
-            - Zainteresowania naukowe
-            
-            **Co NIE jest zapisywane:**
-            - Dane osobowe (adres, telefon, email)
-            - Informacje wrażliwe
-            - Historia rozmów (tylko fakty edukacyjne)
-            """)
-    
-    st.stop()  # Zatrzymaj wykonywanie reszty kodu jeśli nie zalogowany
+    st.stop()
 
-# Nagłówek dla zalogowanego ucznia
+# Po zalogowaniu - główny interfejs chatbota
 col1, col2, col3 = st.columns([3, 1, 1])
 with col1:
     st.subheader(f"👋 Cześć {st.session_state['student_name']}!")
     st.write("Zadawaj pytania, a poprowadzę Cię do odpowiedzi przez przemyślane pytania!")
 with col2:
     if st.button("❓ FAQ"):
-        st.session_state["show_faq"] = not st.session_state["show_faq"]
+        st.session_state["show_faq"] = not st.session_state.get("show_faq", False)
 with col3:
     if st.button("🚪 Wyloguj"):
         st.session_state["student_name"] = ""
@@ -458,8 +417,7 @@ with col3:
         st.session_state["nie_wiem_counter"] = 0
         st.rerun()
 
-# FAQ dla zalogowanych
-if st.session_state["show_faq"]:
+if st.session_state.get("show_faq", False):
     with st.expander("❓ Przypomnienie - jak korzystać z Sokratesa", expanded=True):
         col1, col2 = st.columns(2)
         with col1:
@@ -467,136 +425,33 @@ if st.session_state["show_faq"]:
             st.write("• Zadaję pytania zamiast podawać odpowiedzi")
             st.write("• Prowadzę Cię do samodzielnego odkrycia")
             st.write("• Uczysz się przez myślenie!")
-            
             st.write("**❓ System 'nie wiem':**")
             st.write("• 0-2 razy: tylko pytania prowadzące")
             st.write("• 3 razy: wskazówki")  
             st.write("• 4+ razy: pełna odpowiedź")
-        
         with col2:
             st.write("**👤 Twój profil ucznia:**")
             st.write("• Automatycznie zapisuję Twoje preferencje")
             st.write("• Dostosowuję pytania do Twojego stylu")
             st.write("• Śledzę Twój postęp w nauce")
-            
-            st.write("**💡 Wskazówka:**")
-            st.write("Używaj przycisku 'Udziel odpowiedzi teraz' gdy chcesz przeskoczyć do rozwiązania!")
-    
-    with st.expander("🔒 Bezpieczeństwo Twoich danych (RODO)"):
-        st.write("""
-        **Jak chronię Twoje dane:**
-        
-        - **📁 Lokalne przechowywanie:** Twój profil jest zapisany tylko na tym komputerze w `db/students/{}_memory.json`
-        - **🚫 Brak wysyłania:** Dane nie opuszczają tego urządzenia (poza pytaniami do OpenAI)
-        - **✋ Twoja kontrola:** Możesz w każdej chwili usunąć fakty z profilu przyciskiem 🗑️
-        - **🗂️ Tylko edukacja:** Zapisuję wyłącznie informacje o Twoim stylu nauki i preferencjach
-        - **🔄 Transparentność:** Widzisz wszystko co o Tobie wiem w bocznym panelu
-        
-        Twoje dane są bezpieczne i pod Twoją kontrolą!
-        """.format(st.session_state["student_name"]))
 
-# Status panel
-col1, col2, col3 = st.columns(3)
-with col1:
-    st.metric("Licznik 'nie wiem'", f"{st.session_state['nie_wiem_counter']}/4")
-with col2:
-    if st.session_state["nie_wiem_counter"] >= 4:
-        st.success("✅ Udzielam pełnej odpowiedzi!")
-    elif st.session_state["nie_wiem_counter"] >= 3:
-        st.success("💡 Mogę udzielić wskazówek!")
-    else:
-        st.info("🤔 Zadaję pytania prowadzące")
-with col3:
-    if st.button("🔄 Reset licznika"):
-        st.session_state["nie_wiem_counter"] = 0
-        st.rerun()
+# ===============================
+# INICJALIZACJA STANU SESJI (musi być tuż po importach!)
+# ===============================
+def get_state(key, default):
+    if key not in st.session_state:
+        st.session_state[key] = default
+    return st.session_state[key]
 
-# Przycisk "Udziel odpowiedzi teraz"
-if st.session_state["nie_wiem_counter"] < 4 and len(st.session_state["messages"]) > 0:
-    if st.button("💡 Udziel odpowiedzi teraz", help="Przejdź od razu do udzielenia odpowiedzi"):
-        st.session_state["nie_wiem_counter"] = 4
-        st.rerun()
+get_state('student_name', '')
+get_state('messages', [])
+get_state('facts_to_confirm', [])
+get_state('nie_wiem_counter', 0)
+get_state('current_topic', None)
+get_state('show_faq', False)
+get_state('chatbot_personality', "Jesteś Sokratesem - mądrym filozofem i nauczycielem. Twoim celem jest prowadzić ucznia do samodzielnego myślenia poprzez pytania.")
+get_state('openai_api_key', '')
+get_state('api_key_verified', False)
 
-# Pętla wyświetlająca wiadomości
-for message in st.session_state["messages"]:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
-
-prompt = st.chat_input("Zadaj pytanie lub powiedz 'nie wiem' jeśli potrzebujesz wskazówek...")
-if prompt:
-    with st.chat_message("user"):
-        st.markdown(prompt)
-    st.session_state["messages"].append({"role": "user", "content": prompt})
-
-    with st.chat_message("assistant"):
-        response = chatbot_reply(prompt, st.session_state["messages"][-10:])
-        st.markdown(response["content"])
-
-    st.session_state["messages"].append({"role": "assistant", "content": response["content"], "usage": response["usage"]})
-
-    # === wyciąganie faktów ===
-    nowe_fakty = wyciagnij_fakty_z_tekstu(prompt)
-    nowe_fakty = [f.strip("-• ") for f in nowe_fakty if f.strip()]
-    st.session_state["facts_to_confirm"] = nowe_fakty
-
-# ======== SIDEBAR - FAKTY ========
-with st.sidebar:
-    st.header(f"📚 Profil: {st.session_state['student_name']}")
-    
-    # Uproszczony status nauki
-    if st.session_state["nie_wiem_counter"] == 0:
-        st.info("🤔 Tryb eksploracji")
-    elif st.session_state["nie_wiem_counter"] < 3:
-        st.warning("🧭 Prowadzenie do odpowiedzi")  
-    elif st.session_state["nie_wiem_counter"] < 4:
-        st.success("💡 Gotowy do wskazówek")
-    else:
-        st.success("✅ Udzielanie pełnej odpowiedzi")
-
-    # Nowe fakty - uproszczone
-    if st.session_state["facts_to_confirm"]:
-        st.subheader("📋 Nowe informacje o Tobie")
-        st.caption("Zaznacz, które informacje chcesz zapisać do swojego profilu:")
-        wybrane = []
-        for i, fact in enumerate(st.session_state["facts_to_confirm"]):
-            if st.checkbox(fact, key=f"fact_{i}"):
-                wybrane.append(fact)
-
-        if st.button("💾 Zapisz do profilu"):
-            for fact in wybrane:
-                zapisz_do_pamieci(fact)
-            st.session_state["facts_to_confirm"] = []
-            st.success("Profil zaktualizowany!")
-
-    # Historia faktów - skrócona
-    st.subheader("🎯 Twój profil nauki")
-    st.caption("Co o Tobie wiem:")
-    pamiec = wczytaj_pamiec()
-    if pamiec:
-        # Pokaż tylko ostatnie 3 fakty
-        for i, fact in enumerate(pamiec[-3:][::-1]):
-            col1, col2 = st.columns([8, 1])
-            with col1:
-                st.text(fact[:50] + "..." if len(fact) > 50 else fact)
-            with col2:
-                if st.button("🗑️", key=f"usun_{i}", help="Usuń"):
-                    actual_index = len(pamiec) - 1 - i
-                    usun_fact(actual_index)
-                    st.rerun()
-        
-        if len(pamiec) > 3:
-            st.caption(f"... i {len(pamiec) - 3} więcej informacji")
-    else:
-        st.caption("Twój profil będzie się budował podczas naszych rozmów")
-
-    # Koszty - uproszczone i w PLN
-    st.subheader("💰 Koszty sesji")
-    total_input_tokens = sum([message.get("usage", {}).get("prompt_tokens", 0) for message in st.session_state["messages"]])
-    total_output_tokens = sum([message.get("usage", {}).get("completion_tokens", 0) for message in st.session_state["messages"]])
-    
-    koszt_usd = total_input_tokens * PRICING['input_tokens'] + total_output_tokens * PRICING['output_tokens']
-    koszt_pln = koszt_usd * USD_TO_PLN
-    
-    st.metric("Koszt sesji", f"{koszt_pln:.4f} PLN")
-    st.caption(f"Tokeny: {total_input_tokens + total_output_tokens}")
+# ...tu możesz dodać chatbota i dalszą logikę...
 
