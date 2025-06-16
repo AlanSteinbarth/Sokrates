@@ -105,6 +105,23 @@ Sokrates/
     └── conversations/    # Historia rozmów
 ```
 
+## 🖥️ Kompatybilność z systemami operacyjnymi
+
+Aplikacja Sokrates działa na wszystkich głównych systemach operacyjnych: **Windows, Linux, macOS**.
+- Do obsługi plików wykorzystywany jest `pathlib`, co zapewnia przenośność ścieżek.
+- Pliki zapisywane są w kodowaniu UTF-8.
+- Testy automatyczne sprawdzają poprawność zapisu/odczytu profilu ucznia na różnych OS.
+
+### Testowanie kompatybilności
+
+Aby uruchomić testy sprawdzające działanie na Twoim systemie:
+```bash
+pip install pytest
+pytest test_cross_os.py
+```
+
+Wszelkie błędy zgłaszaj przez [GitHub Issues](https://github.com/AlanSteinbarth/Sokrates/issues).
+
 ## 🔒 Prywatność i RODO
 
 ### Bezpieczeństwo danych

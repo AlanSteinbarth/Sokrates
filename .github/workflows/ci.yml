@@ -77,6 +77,10 @@ jobs:
         # Test basic functions (without Streamlit session state)
         print('✅ Basic validation passed')
         "
+    
+    - name: Run cross-OS compatibility test
+      run: |
+        python -m pytest test_cross_os.py
 
   security-scan:
     runs-on: ubuntu-latest

@@ -201,6 +201,16 @@ Opisz testy, które przeprowadziłeś.
 - [ ] Przetestowałem zmiany lokalnie
 ```
 
+## 🖥️ Testy kompatybilności (cross-OS)
+
+Aby zapewnić, że Twój wkład nie łamie kompatybilności z Windows, Linux i macOS, uruchom testy:
+
+```bash
+pytest test_cross_os.py
+```
+
+Zalecamy testowanie zmian na różnych systemach operacyjnych (np. przez WSL, VM, GitHub Actions).
+
 ## 🎨 Obszary Pomocy
 
 ### Dla Programistów

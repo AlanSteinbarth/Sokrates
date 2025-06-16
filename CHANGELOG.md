@@ -13,6 +13,10 @@ a projekt stosuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Dashboard z statystykami postępów
 - Tryb offline z podstawową funkcjonalnością
 
+### Dodane
+- Test automatyczny `test_cross_os.py` sprawdzający kompatybilność z Windows, Linux, macOS
+- Dokumentacja: sekcja o kompatybilności systemowej i uruchamianiu testów cross-OS
+
 ## [2.1.0] - 2025-05-25
 
 ### Dodane
