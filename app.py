@@ -428,6 +428,45 @@ with st.sidebar:
       visibility: visible;
       opacity: 1;
     }}
+    /* Ulepszenia responsywności dla urządzeń mobilnych */
+    @media (max-width: 600px) {{
+      .sokrates-tooltip-box {{
+        padding: 8px 4vw 14px 4vw !important;
+        font-size: 1em !important;
+      }}
+      .sokrates-tooltip-icon {{
+        right: 6vw !important;
+        width: 22px !important;
+        height: 22px !important;
+        font-size: 1.3em !important;
+      }}
+      .sokrates-tooltip-icon .sokrates-tooltiptext {{
+        left: 10vw !important;
+        min-width: 120px !important;
+        font-size: 0.95em !important;
+        padding: 7px 8px !important;
+      }}
+      .sokrates-tooltip-icon.niewiem .sokrates-tooltiptext {{
+        top: 120vw !important;
+      }}
+      .sokrates-tooltip-icon.koszt .sokrates-tooltiptext {{
+        top: 150vw !important;
+      }}
+      .element-container, .stTextInput, .stTextArea, .stButton, .stForm {{
+        font-size: 1.08em !important;
+      }}
+      .stTextInput input, .stTextArea textarea {{
+        font-size: 1.08em !important;
+        padding: 10px !important;
+      }}
+      .stButton button {{
+        font-size: 1.08em !important;
+        padding: 10px 18px !important;
+      }}
+      .stMarkdown, .stSubheader, .stHeader {{
+        font-size: 1.08em !important;
+      }}
+    }}
     </style>
     <div class='sokrates-tooltip-box' style='background: #e0e0e0; border-radius: 10px; padding: 10px 16px 18px 16px; margin-bottom: 8px; box-shadow: 0 1px 4px #bdbdbd; position: relative; overflow: visible !important;'>
         <b style='color: #333;'>Licznik 'nie wiem:'</b>
