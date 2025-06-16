@@ -1,5 +1,5 @@
 # =============================================================================
-# SOKRATES - CYFROWY NAUCZYCIEL AI
+# 🧠 Sokrates - Twój cyfrowy nauczyciel 🤖
 # =============================================================================
 # Autor: Alan Steinbarth (alan.steinbarth@gmail.com)
 # GitHub: https://github.com/AlanSteinbarth/Sokrates
@@ -28,6 +28,7 @@
 # Każda funkcja posiada docstring z opisem działania i argumentów.
 # =============================================================================
 
+# USUNIĘTO: import os, glob, pandas as pd
 import json
 from pathlib import Path
 import streamlit as st
@@ -53,6 +54,7 @@ get_state('chatbot_personality', "Jesteś Sokratesem - mądrym filozofem i naucz
 get_state('openai_api_key', '')
 get_state('api_key_verified', False)
 get_state('cost_total_pln', 0.0)
+get_state('show_admin_panel', False)
 
 # =============================================================================
 # KONFIGURACJA APLIKACJI
@@ -86,8 +88,8 @@ def get_api_key() -> str:
     if "openai_api_key" in st.session_state and st.session_state["openai_api_key"]:
         return st.session_state["openai_api_key"]
     # Następnie sprawdź plik .env
-    env = dotenv_values(".env")
-    value = env.get("OPENAI_API_KEY", "")
+    env_local = dotenv_values(".env")  # zmiana nazwy zmiennej
+    value = env_local.get("OPENAI_API_KEY", "")
     return value if value is not None else ""
 
 def verify_api_key(api_key: str) -> bool:
@@ -97,13 +99,13 @@ def verify_api_key(api_key: str) -> bool:
     """
     try:
         client = OpenAI(api_key=api_key)
-        # Minimalne zapytanie do modelu (bardzo krótka wiadomość)
-        response = client.chat.completions.create(
+        api_response = client.chat.completions.create(
             model=MODEL,
             messages=[{"role": "user", "content": "ping"}]
         )
-        return bool(response.choices[0].message.content)
-    except Exception:
+        return bool(api_response.choices[0].message.content)
+    except (ValueError, KeyError, AttributeError, Exception) as e:
+        st.error(f"Błąd weryfikacji klucza API: {e}")
         return False
 
 # Inicjalizacja klienta OpenAI (dynamicznie na podstawie klucza)
@@ -248,7 +250,7 @@ def wyciagnij_fakty_z_tekstu(text: str) -> List[str]:
     """
     try:
         client = get_openai_client()
-        response = client.chat.completions.create(
+        ai_response = client.chat.completions.create(
             model=MODEL,
             messages=[
                 {"role": "system", "content": """Wydobądź z tekstu fakty o uczniu, które warto zapamiętać dla procesu nauczania:
@@ -262,11 +264,11 @@ Wypisz jako listę wypunktowaną, krótko i konkretnie."""},
                 {"role": "user", "content": text}
             ]
         )
-        content = response.choices[0].message.content
+        content = ai_response.choices[0].message.content
         if content is None:
             return []
         return [line.strip() for line in content.split("\n") if line.strip()]
-    except Exception as e:
+    except (ValueError, KeyError, AttributeError, Exception) as e:
         st.error(f"Błąd podczas analizy tekstu: {e}")
         return []
 
@@ -333,18 +335,17 @@ Profil ucznia: {memory_context}
 
     try:
         client = get_openai_client()
-        response = client.chat.completions.create(
+        chat_response = client.chat.completions.create(
             model=MODEL,
             messages=messages,
             stream=False
         )
-        # Zwracamy tylko najważniejsze dane jako dict
         return {
-            "content": response.choices[0].message.content if response.choices else "",
-            "usage": getattr(response, "usage", None),
-            "raw": response
+            "content": chat_response.choices[0].message.content if chat_response.choices else "",
+            "usage": getattr(chat_response, "usage", None),
+            "raw": chat_response
         }
-    except Exception as e:
+    except (ValueError, KeyError, AttributeError, Exception) as e:
         st.error(f"Błąd podczas komunikacji z AI: {e}")
         return {"content": "", "usage": None, "raw": None}
 
@@ -353,17 +354,14 @@ Profil ucznia: {memory_context}
 # ===============================
 with st.sidebar:
     st.header("🔑 OpenAI API Key")
-    # Najpierw pobierz z .env
-    env = dotenv_values(".env")
-    env_api_key = env.get("OPENAI_API_KEY", "")
-    # Następnie pobierz z sidebaru (może nadpisać .env)
+    env_sidebar = dotenv_values(".env")  # zmiana nazwy zmiennej
+    env_api_key = env_sidebar.get("OPENAI_API_KEY", "")
     api_key_input = st.text_input(
         "Podaj swój OpenAI API Key",
         type="password",
         value=st.session_state.get("openai_api_key", env_api_key),
         help="Wprowadź swój klucz OpenAI API lub dodaj go do pliku .env jako OPENAI_API_KEY. Klucz jest wymagany do działania aplikacji."
     )
-    # Jeśli użytkownik coś wpisał, użyj tego, w przeciwnym razie użyj z .env
     if api_key_input:
         st.session_state["openai_api_key"] = api_key_input
     else:
@@ -385,155 +383,108 @@ with st.sidebar:
         st.info("Podaj swój klucz OpenAI API lub dodaj go do pliku .env.")
         st.session_state["api_key_verified"] = False
 
-    st.markdown("---")
-    # Licznik "nie wiem"
-    nie_wiem_counter = st.session_state.get("nie_wiem_counter", 0)
-    st.markdown(f"""
-    <style>
-    .sokrates-tooltip-box {{
-      position: relative;
-      display: block;
-      overflow: visible !important;
-    }}
-    .sokrates-tooltip-icon {{
-      position: absolute;
-      top: 10px;
-      right: 14px;
-      z-index: 1002;
-      cursor: help;
-      font-size: 1.1em;
-      color: #1976d2;
-      background: #fff;
-      border-radius: 50%;
-      border: 1.5px solid #1976d2;
-      width: 18px;
-      height: 18px;
-      text-align: center;
-      line-height: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: visible !important;
-    }}
-    .sokrates-tooltip-icon .sokrates-tooltiptext {{
-      visibility: hidden;
-      opacity: 0;
-      background-color: #222;
-      color: #fff;
-      text-align: left;
-      border-radius: 7px;
-      padding: 7px 14px;
-      position: fixed;
-      z-index: 99999;
-      left: 320px;
-      font-size: 0.98em;
-      white-space: nowrap;
-      box-shadow: 0 2px 8px #888;
-      min-width: 180px;
-      max-width: none;
-      width: max-content;
-      text-align: left;
-      pointer-events: none;
-    }}
-    .sokrates-tooltip-icon.niewiem .sokrates-tooltiptext {{
-      top: 390px;
-    }}
-    .sokrates-tooltip-icon.koszt .sokrates-tooltiptext {{
-      top: 500px;
-    }}
-    .sokrates-tooltip-icon:hover .sokrates-tooltiptext {{
-      visibility: visible;
-      opacity: 1;
-    }}
-    /* Ulepszenia responsywności dla urządzeń mobilnych */
-    @media (max-width: 600px) {{
-      .sokrates-tooltip-box {{
-        padding: 8px 4vw 14px 4vw !important;
-        font-size: 1em !important;
-      }}
-      .sokrates-tooltip-icon {{
-        right: 6vw !important;
-        width: 22px !important;
-        height: 22px !important;
-        font-size: 1.3em !important;
-      }}
-      .sokrates-tooltip-icon .sokrates-tooltiptext {{
-        left: 10vw !important;
-        min-width: 120px !important;
-        font-size: 0.95em !important;
-        padding: 7px 8px !important;
-      }}
-      .sokrates-tooltip-icon.niewiem .sokrates-tooltiptext {{
-        top: 120vw !important;
-      }}
-      .sokrates-tooltip-icon.koszt .sokrates-tooltiptext {{
-        top: 150vw !important;
-      }}
-      .element-container, .stTextInput, .stTextArea, .stButton, .stForm {{
-        font-size: 1.08em !important;
-      }}
-      .stTextInput input, .stTextArea textarea {{
-        font-size: 1.08em !important;
-        padding: 10px !important;
-      }}
-      .stButton button {{
-        font-size: 1.08em !important;
-        padding: 10px 18px !important;
-      }}
-      .stMarkdown, .stSubheader, .stHeader {{
-        font-size: 1.08em !important;
-      }}
-    }}
-    </style>
-    <div class='sokrates-tooltip-box' style='background: #e0e0e0; border-radius: 10px; padding: 10px 16px 18px 16px; margin-bottom: 8px; box-shadow: 0 1px 4px #bdbdbd; position: relative; overflow: visible !important;'>
-        <b style='color: #333;'>Licznik 'nie wiem:'</b>
-        <span style='font-size: 1.3em; font-weight: bold; color: #333; display: block; margin-top: 4px;'>
-            {nie_wiem_counter} / 4
-        </span>
-        <span class="sokrates-tooltip-icon niewiem">?
-            <span class="sokrates-tooltiptext">Licznik zwiększa się, gdy odpowiadasz 'nie wiem' lub podobnie. Po 4 razach Sokrates poda pełną odpowiedź.</span>
-        </span>
-    </div>
-    <hr style='margin: 12px 0; border: none; border-top: 1px solid #bbb;'>
-    <div class='sokrates-tooltip-box' style='background: #e0e0e0; border-radius: 10px; padding: 10px 16px 18px 16px; margin-bottom: 8px; box-shadow: 0 1px 4px #bdbdbd; position: relative; overflow: visible !important;'>
-        <b style='color: #333;'>Szacowany koszt rozmowy:</b>
-        <span style='font-size: 1.3em; font-weight: bold; color: #333; display: block; margin-top: 4px;'>
-            {st.session_state['cost_total_pln']:.4f} zł
-        </span>
-        <span class="sokrates-tooltip-icon koszt">?
-            <span class="sokrates-tooltiptext">Koszt liczony na podstawie liczby tokenów zużytych przez model OpenAI (input/output) i aktualnego kursu USD/PLN. To tylko szacunkowa wartość.</span>
-        </span>
-    </div>
-    """, unsafe_allow_html=True)
-    st.markdown("---")
-    # FAQ
-    if st.button("FAQ / Jak to działa?"):
-        st.session_state["show_faq"] = not st.session_state.get("show_faq", False)
-    if st.session_state.get("show_faq", False):
-        with st.expander("🤔 Jak działa metoda sokratejska?", expanded=True):
-            st.write("""
-            **Metoda sokratejska** to sposób uczenia przez zadawanie pytań prowadzących, zamiast podawania gotowych odpowiedzi.
-            1. Zadajesz pytanie Sokratesowi
-            2. Otrzymujesz pytania, które mają Cię naprowadzić na odpowiedź
-            3. Próbujesz odpowiadać na te pytania
-            4. Samodzielnie dochodzisz do rozwiązania!
-            """)
-        with st.expander("❓ Co oznacza 'nie wiem' i licznik?"):
-            st.write("""
-            **Licznik 'nie wiem'** to system pomocy:
-            - 0-2 razy: pytania prowadzące
-            - 3 razy: wskazówki i częściowe odpowiedzi
-            - 4+ razy: pełna odpowiedź z wyjaśnieniem
-            """)
-        with st.expander("👤 Co to jest profil ucznia?"):
-            st.write("""
-            **Profil ucznia** to Twoja osobista karta nauki, która zawiera:
-            - Poziom wiedzy
-            - Sposób, w jaki najlepiej się uczysz
-            - Trudności, z jakimi się zmagasz
-            - Postępy w nauce
-            - Zainteresowania naukowe
-            """)
+    # Pokaż resztę sidebaru dopiero po podaniu imienia
+    if st.session_state.get("api_key_verified", False) and st.session_state.get("student_name", ""):
+        nie_wiem_counter = st.session_state.get("nie_wiem_counter", 0)
+        st.markdown(f"""
+        <style>
+        .sokrates-tooltip-box {{ position: relative; display: block; overflow: visible !important; }}
+        .sokrates-tooltip-icon {{ position: absolute; top: 10px; right: 14px; z-index: 1002; cursor: help; font-size: 1.1em; color: #1976d2; background: #fff; border-radius: 50%; border: 1.5px solid #1976d2; width: 18px; height: 18px; text-align: center; line-height: 16px; display: flex; align-items: center; justify-content: center; overflow: visible !important; }}
+        .sokrates-tooltip-icon .sokrates-tooltiptext {{ visibility: hidden; opacity: 0; background-color: #222; color: #fff; text-align: left; border-radius: 7px; padding: 7px 14px; position: fixed; z-index: 99999; left: 320px; font-size: 0.98em; white-space: nowrap; box-shadow: 0 2px 8px #888; min-width: 180px; max-width: none; width: max-content; text-align: left; pointer-events: none; }}
+        .sokrates-tooltip-icon.niewiem .sokrates-tooltiptext {{ top: 390px; }}
+        .sokrates-tooltip-icon.koszt .sokrates-tooltiptext {{ top: 500px; }}
+        .sokrates-tooltip-icon:hover .sokrates-tooltiptext {{ visibility: visible; opacity: 1; }}
+        @media (max-width: 600px) {{ .sokrates-tooltip-box {{ padding: 8px 4vw 14px 4vw !important; font-size: 1em !important; }} .sokrates-tooltip-icon {{ right: 6vw !important; width: 22px !important; height: 22px !important; font-size: 1.3em !important; }} .sokrates-tooltip-icon .sokrates-tooltiptext {{ left: 10vw !important; min-width: 120px !important; font-size: 0.95em !important; padding: 7px 8px !important; }} .sokrates-tooltip-icon.niewiem .sokrates-tooltiptext {{ top: 120vw !important; }} .sokrates-tooltip-icon.koszt .sokrates-tooltiptext {{ top: 150vw !important; }} .element-container, .stTextInput, .stTextArea, .stButton, .stForm {{ font-size: 1.08em !important; }} .stTextInput input, .stTextArea textarea {{ font-size: 1.08em !important; padding: 10px !important; }} .stButton button {{ font-size: 1.08em !important; padding: 10px 18px !important; }} .stMarkdown, .stSubheader, .stHeader {{ font-size: 1.08em !important; }} }}
+        </style>
+        <div class='sokrates-tooltip-box' style='background: #e0e0e0; border-radius: 10px; padding: 10px 16px 18px 16px; margin-bottom: 8px; box-shadow: 0 1px 4px #bdbdbd; position: relative; overflow: visible !important;'>
+            <b style='color: #333;'>Licznik 'nie wiem:'</b>
+            <span style='font-size: 1.3em; font-weight: bold; color: #333; display: block; margin-top: 4px;'>
+                {nie_wiem_counter} / 4
+            </span>
+            <span class=\"sokrates-tooltip-icon niewiem\">?
+                <span class=\"sokrates-tooltiptext\">Licznik zwiększa się, gdy odpowiadasz 'nie wiem' lub podobnie. Po 4 razach Sokrates poda pełną odpowiedź.</span>
+            </span>
+        </div>
+        <hr style='margin: 12px 0; border: none; border-top: 1px solid #bbb;'>
+        <div class='sokrates-tooltip-box' style='background: #e0e0e0; border-radius: 10px; padding: 10px 16px 18px 16px; margin-bottom: 8px; box-shadow: 0 1px 4px #bdbdbd; position: relative; overflow: visible !important;'>
+            <b style='color: #333;'>Szacowany koszt rozmowy:</b>
+            <span style='font-size: 1.3em; font-weight: bold; color: #333; display: block; margin-top: 4px;'>
+                {st.session_state['cost_total_pln']:.4f} zł
+            </span>
+            <span class=\"sokrates-tooltip-icon koszt\">?
+                <span class=\"sokrates-tooltiptext\">Koszt liczony na podstawie liczby tokenów zużytych przez model OpenAI (input/output) i aktualnego kursu USD/PLN. To tylko szacunkowa wartość.</span>
+            </span>
+        </div>
+        """, unsafe_allow_html=True)
+        # Panel administracyjny (placeholder)
+        if st.button("🛡️ Panel administracyjny (Enterprise Preview)"):
+            st.session_state["show_admin_panel"] = not st.session_state.get("show_admin_panel", False)
+        if st.session_state.get("show_admin_panel", False):
+            st.markdown("""
+            <div style='background: #f5f5f5; border-radius: 10px; padding: 18px 14px; margin: 10px 0; box-shadow: 0 1px 4px #bdbdbd;'>
+                <b style='font-size:1.1em;'>Panel administracyjny (Enterprise Preview)</b><br><br>
+                <ul style='margin-top: 8px; margin-bottom: 0;'>
+                  <li><b>Statystyki użytkowników</b>: <span style='color:#1976d2;'>Wkrótce</span></li>
+                  <li><b>Zarządzanie kontami</b>: <span style='color:#1976d2;'>Wkrótce</span></li>
+                  <li><b>Eksport danych</b>: <span style='color:#1976d2;'>Wkrótce</span></li>
+                  <li><b>Logi aktywności i audyt</b>: <span style='color:#1976d2;'>Wkrótce</span></li>
+                  <li><b>Integracje SSO (Google, Microsoft, LDAP)</b>: <span style='color:#1976d2;'>Wkrótce</span></li>
+                  <li><b>API do integracji z zewnętrznymi systemami</b>: <span style='color:#1976d2;'>Wkrótce</span></li>
+                  <li><b>System zgłoszeń i wsparcia</b>: <span style='color:#1976d2;'>Wkrótce</span></li>
+                  <li><b>Pełna dokumentacja techniczna</b>: <span style='color:#1976d2;'>Wkrótce</span></li>
+                </ul>
+                <hr style='margin:10px 0;'>
+                <b>Podstawowe informacje:</b><br>
+                <ul style='margin-top: 6px; margin-bottom: 0;'>
+                  <li><b>Liczba aktywnych użytkowników:</b> <span style='color:#888;'>demo</span></li>
+                  <li><b>Wersja aplikacji:</b> 2.2.0</li>
+                  <li><b>Data builda:</b> 16.06.2025</li>
+                  <li><b>Tryb:</b> <span style='color:#1976d2;'>Enterprise Preview</span></li>
+                </ul>
+                <hr style='margin:10px 0;'>
+                <b>Bezpieczeństwo i zgodność:</b><br>
+                <ul style='margin-top: 6px; margin-bottom: 0;'>
+                  <li>RODO/GDPR, FERPA, COPPA <span style='color:#1976d2;'>Ready</span></li>
+                  <li>Szyfrowanie danych <span style='color:#1976d2;'>Wkrótce</span></li>
+                  <li>Audyt logów <span style='color:#1976d2;'>Wkrótce</span></li>
+                  <li>Certyfikaty bezpieczeństwa <span style='color:#1976d2;'>Wkrótce</span></li>
+                </ul>
+                <span style='font-size:0.95em;color:#888;'>To tylko podgląd funkcji enterprise. Skontaktuj się z administratorem, aby uzyskać dostęp do pełnej wersji.</span>
+            </div>
+            """, unsafe_allow_html=True)
+        # FAQ wyśrodkowany względem sidebaru (poprawka)
+        st.markdown("""
+        <div style='display: flex; justify-content: center; align-items: center; width: 100%;'>
+        """, unsafe_allow_html=True)
+        faq_clicked = st.button("FAQ / Jak to działa?", key="faq_btn_sidebar")
+        st.markdown("</div>", unsafe_allow_html=True)
+        if faq_clicked:
+            st.session_state["show_faq"] = not st.session_state.get("show_faq", False)
+        if st.session_state.get("show_faq", False):
+            with st.expander("🤔 Jak działa metoda sokratejska?", expanded=True):
+                st.write("""
+                **Metoda sokratejska** to sposób uczenia przez zadawanie pytań prowadzących, zamiast podawania gotowych odpowiedzi.
+                1. Zadajesz pytanie Sokratesowi
+                2. Otrzymujesz pytania, które mają Cię naprowadzić na odpowiedź
+                3. Próbujesz odpowiadać na te pytania
+                4. Samodzielnie dochodzisz do rozwiązania!
+                """)
+            with st.expander("❓ Co oznacza 'nie wiem' i licznik?"):
+                st.write("""
+                **Licznik 'nie wiem'** to system pomocy:
+                - 0-2 razy: pytania prowadzące
+                - 3 razy: wskazówki i częściowe odpowiedzi
+                - 4+ razy: pełna odpowiedź z wyjaśnieniem
+                """)
+            with st.expander("👤 Co to jest profil ucznia?"):
+                st.write("""
+                **Profil ucznia** to Twoja osobista karta nauki, która zawiera:
+                - Poziom wiedzy
+                - Sposób, w jaki najlepiej się uczysz
+                - Trudności, z jakimi się zmagasz
+                - Postępy w nauce
+                - Zainteresowania naukowe
+                """)
 
 # ===============================
 # BLOKADA FUNKCJI DO CZASU WERYFIKACJI KLUCZA
@@ -554,14 +505,14 @@ if not st.session_state.get("student_name", ""):
     st.markdown("""
     <h2 style='text-align: center;'>🧠 Sokrates - Twój cyfrowy nauczyciel</h2>
     <div style='text-align: center;'>
-        <p>Podaj swoje imię, aby rozpocząć naukę metodą sokratejską!</p>
+        <p>Odkrywaj wiedzę z pomocą AI, która prowadzi Cię pytaniami – ucz się skuteczniej, myśl samodzielnie i rozwijaj swój potencjał!</p>
     </div>
     """, unsafe_allow_html=True)
     col1, col2 = st.columns([3, 1])
     with col1:
         student_input = st.text_input("Podaj swoje imię:", placeholder="np. Anna, Tomek...", key="student_name_input")
     with col2:
-        st.markdown("<div style='height: 1.7em'></div>", unsafe_allow_html=True)  # Wyrównanie do środka pola tekstowego
+        st.markdown("<div style='height: 1.7em'></div>", unsafe_allow_html=True)
         if st.button("🚀 Start") and student_input.strip():
             st.session_state["student_name"] = student_input.strip()
             st.session_state["messages"] = []  # Reset rozmowy dla nowego ucznia
@@ -569,86 +520,42 @@ if not st.session_state.get("student_name", ""):
             st.rerun()
     st.stop()
 
-# Po zalogowaniu - główny interfejs chatbota
-col1, col2, col3 = st.columns([3, 1, 1])
-with col1:
-    st.subheader(f"👋 Cześć {st.session_state['student_name']}!")
-    st.write("Zadawaj pytania, a poprowadzę Cię do odpowiedzi przez przemyślane pytania!")
-with col3:
-    if st.button("🚪 Wyloguj"):
-        st.session_state["student_name"] = ""
-        st.session_state["messages"] = []
-        st.session_state["nie_wiem_counter"] = 0
-        st.rerun()
+# =============================================================================
+# INTERFEJS CZATU I OBSŁUGA ROZMOWY
+# =============================================================================
 
-# ===============================
-# GŁÓWNY INTERFEJS CHATBOTA (po zalogowaniu)
-# ===============================
-if st.session_state.get("student_name", ""):
-    st.markdown("---")
-    st.subheader("💬 Rozmowa z Sokratesem")
-    # Wyświetl historię rozmowy z wyróżnieniem
-    for msg in st.session_state["messages"]:
-        if msg["role"] == "user":
-            user_name = st.session_state.get("student_name", "Ty")
-            st.markdown(
-                f"""
-                <div style='display: flex; justify-content: flex-end;'>
-                    <div style='background: #e0f7fa; color: #000; border-radius: 12px; padding: 10px 16px; margin: 4px 0; max-width: 70%; box-shadow: 0 2px 8px #bdbdbd;'>
-                        <span style='font-size: 1.2em;'>🧑‍💻 <b>{user_name}:</b></span><br>{msg['content']}
-                    </div>
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
-        elif msg["role"] == "assistant":
-            st.markdown(
-                f"""
-                <div style='display: flex; justify-content: flex-start;'>
-                    <div style='background: #fff3e0; color: #000; border-radius: 12px; padding: 10px 16px; margin: 4px 0; max-width: 70%; box-shadow: 0 2px 8px #ffe0b2;'>
-                        <span style='font-size: 1.2em;'>🧑‍🏫 <b>Sokrates:</b></span><br>{msg['content']}
-                    </div>
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
-    # Formularz do wpisywania pytania
-    with st.form(key="chat_form", clear_on_submit=True):
-        user_input = st.text_area("Zadaj pytanie Sokratesowi:", height=70, key="chat_input",
-                                 placeholder="Wpisz pytanie i naciśnij Enter lub kliknij Wyślij...")
-        submitted = st.form_submit_button("Wyślij")
-        # Dodaj obsługę wysyłania przez Enter (JS dla st.text_area)
-        import streamlit.components.v1 as components
-        components.html('''
-        <script>
-        const textarea = window.parent.document.querySelector('textarea[data-testid="stTextArea"]');
-        if (textarea) {
-            textarea.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    const btns = window.parent.document.querySelectorAll('button[kind="primary"]');
-                    if (btns.length > 0) btns[0].click();
-                }
-            });
-        }
-        </script>
-        ''', height=0)
-    if submitted and user_input.strip():
-        # Dodaj pytanie użytkownika do historii
-        st.session_state["messages"].append({"role": "user", "content": user_input.strip()})
-        # Wywołaj AI i dodaj odpowiedź
-        response = chatbot_reply(user_input.strip(), st.session_state["messages"])
-        st.session_state["messages"].append({"role": "assistant", "content": response["content"]})
-        # Liczenie kosztu
-        usage = response.get("usage")
-        if usage and hasattr(usage, "prompt_tokens") and hasattr(usage, "completion_tokens"):
-            input_tokens = usage.prompt_tokens
-            output_tokens = usage.completion_tokens
-            cost = (input_tokens * PRICING["input_tokens"] + output_tokens * PRICING["output_tokens"]) * USD_TO_PLN
-            st.session_state["cost_total_pln"] += cost
-        # Wyciągnij fakty z wypowiedzi użytkownika i zapisz do profilu
-        fakty = wyciagnij_fakty_z_tekstu(user_input.strip())
-        for fact in fakty:
-            zapisz_do_pamieci(fact)
-        st.rerun()
+st.markdown("""
+<h2 style='text-align: center;'>🧠 Sokrates - Twój cyfrowy nauczyciel</h2>
+<div style='text-align: center;'>
+    <p>Zadaj pytanie lub napisz, czego chcesz się nauczyć. Sokrates poprowadzi Cię pytaniami!</p>
+</div>
+""", unsafe_allow_html=True)
+
+# Wyświetlanie historii rozmowy
+for msg in st.session_state["messages"]:
+    if msg["role"] == "user":
+        st.chat_message("user").write(msg["content"])
+    else:
+        st.chat_message("assistant").write(msg["content"])
+
+# Pole do wpisania nowej wiadomości
+with st.form(key="chat_form", clear_on_submit=True):
+    user_input = st.text_area("Napisz swoją wiadomość do Sokratesa:", height=70, key="user_input")
+    submit = st.form_submit_button("Wyślij")
+
+# --- AKTUALIZACJA KOSZTU ROZMOWY ---
+# W sekcji obsługi czatu, po uzyskaniu odpowiedzi AI:
+if submit and user_input.strip():
+    st.session_state["messages"].append({"role": "user", "content": user_input.strip()})
+    response = chatbot_reply(user_input.strip(), st.session_state["messages"])
+    ai_content = response.get("content", "[Brak odpowiedzi od AI]")
+    # --- koszt rozmowy ---
+    usage = response.get("usage")
+    if usage and hasattr(usage, 'prompt_tokens') and hasattr(usage, 'completion_tokens'):
+        input_tokens = usage.prompt_tokens
+        output_tokens = usage.completion_tokens
+        cost = (input_tokens * PRICING["input_tokens"] + output_tokens * PRICING["output_tokens"]) * USD_TO_PLN
+        st.session_state["cost_total_pln"] += cost
+    st.session_state["messages"].append({"role": "assistant", "content": ai_content})
+    st.rerun()
 
