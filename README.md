@@ -105,6 +105,19 @@ Sokrates/
     └── conversations/    # Historia rozmów
 ```
 
+## 📑 Spis treści
+- [Funkcje](#-funkcje)
+- [Szybki Start](#-szybki-start)
+- [Jak używać](#-jak-używać)
+- [Konfiguracja](#-konfiguracja)
+- [Kompatybilność z systemami operacyjnymi](#-kompatybilność-z-systemami-operacyjnymi)
+- [Prywatność i RODO](#-prywatność-i-rodo)
+- [Współpraca](#-współpraca)
+- [Licencja](#-licencja)
+- [Autor](#-autor)
+- [Podziękowania](#-podziękowania)
+- [Statystyki](#-statystyki)
+
 ## 🖥️ Kompatybilność z systemami operacyjnymi
 
 Aplikacja Sokrates działa na wszystkich głównych systemach operacyjnych: **Windows, Linux, macOS**.
@@ -169,8 +182,8 @@ Ten projekt jest licencjonowany na licencji MIT - zobacz plik [LICENSE](LICENSE)
 
 ## 📊 Statystyki
 
-- **Wersja**: 2.0.0
-- **Status**: Stabilna
+- **Wersja**: 2.2.0
+- **Status**: Produkcyjna
 - **Język**: Polski
 - **Framework**: Streamlit
 - **AI Model**: GPT-4o-mini

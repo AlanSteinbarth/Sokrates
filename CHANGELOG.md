@@ -17,6 +17,18 @@ a projekt stosuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Test automatyczny `test_cross_os.py` sprawdzający kompatybilność z Windows, Linux, macOS
 - Dokumentacja: sekcja o kompatybilności systemowej i uruchamianiu testów cross-OS
 
+## [2.2.0] - 2025-06-16
+
+### Dodane
+- Szczegółowy spis treści (TOC) i podział na sekcje w app.py
+- Docstringi i opisy dla wszystkich funkcji
+- Uporządkowanie kodu i sekcji w pliku głównym
+- Aktualizacja dokumentacji (README, CONTRIBUTING, CHANGELOG)
+- Status: produkcyjny, przygotowanie do wydania
+
+### Usunięte
+- Pliki tymczasowe, cache, testowe profile uczniów, logi
+
 ## [2.1.0] - 2025-05-25
 
 ### Dodane

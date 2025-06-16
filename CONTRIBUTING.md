@@ -257,6 +257,11 @@ Zalecamy testowanie zmian na różnych systemach operacyjnych (np. przez WSL, VM
 - [OpenAI API](https://platform.openai.com/docs/)
 - [Python Style Guide](https://peps.python.org/pep-0008/)
 
+## ℹ️ Wersja i status
+
+- Aktualna wersja: 2.2.0 (16.06.2025)
+- Status: produkcyjny, kod uporządkowany, pełna dokumentacja
+
 ## 🙏 Uznanie
 
 Wszyscy współtwórcy będą wymienieni w README.md. Dziękujemy za każdy wkład!

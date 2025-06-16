@@ -3,12 +3,29 @@
 # =============================================================================
 # Autor: Alan Steinbarth (alan.steinbarth@gmail.com)
 # GitHub: https://github.com/AlanSteinbarth/Sokrates
-# Wersja: 2.1.0
+# Wersja: 2.2.0
 # Licencja: MIT
 # 
 # Aplikacja wykorzystująca metodę sokratejską do nauczania przez pytania
 # prowadzące zamiast podawania gotowych odpowiedzi. Każdy uczeń ma 
 # indywidualny profil z automatycznie wykrywanymi preferencjami nauki.
+# =============================================================================
+#
+# SPIS TREŚCI (TOC):
+# 1. Importy i konfiguracja globalna
+# 2. Inicjalizacja stanu sesji Streamlit
+# 3. Konfiguracja aplikacji i cennik modeli
+# 4. Obsługa klucza API i klienta OpenAI
+# 5. Zarządzanie profilami uczniów (pliki, pamięć)
+# 6. System pamięci długoterminowej (zapis/odczyt faktów)
+# 7. Ekstrakcja faktów z tekstu (AI)
+# 8. Główna logika chatbota sokratejskiego
+# 9. Sidebar: klucz API, liczniki, FAQ
+# 10. Blokada funkcji do czasu weryfikacji klucza
+# 11. Logowanie ucznia i główny interfejs
+# 12. Interfejs czatu i obsługa rozmowy
+#
+# Każda funkcja posiada docstring z opisem działania i argumentów.
 # =============================================================================
 
 import json
