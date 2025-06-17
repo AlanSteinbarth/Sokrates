@@ -416,48 +416,56 @@ with st.sidebar:
             </span>
         </div>
         """, unsafe_allow_html=True)
-        # Panel administracyjny (placeholder)
-        if st.button("🛡️ Panel administracyjny (Enterprise Preview)"):
+        # Panel administracyjny - przycisk na całą szerokość i wyśrodkowany
+        st.markdown("""
+        <div style='display: flex; justify-content: center; align-items: center; width: 100%;'>
+        <div style='flex:1; max-width: 100%;'>
+        """, unsafe_allow_html=True)
+        admin_clicked = st.button("🛡️ Panel administracyjny (Enterprise Preview)", key="admin_btn_sidebar", use_container_width=True)
+        st.markdown("</div></div>", unsafe_allow_html=True)
+        if admin_clicked:
             st.session_state["show_admin_panel"] = not st.session_state.get("show_admin_panel", False)
         if st.session_state.get("show_admin_panel", False):
             st.markdown("""
-            <div style='background: #f5f5f5; border-radius: 10px; padding: 18px 14px; margin: 10px 0; box-shadow: 0 1px 4px #bdbdbd;'>
-                <b style='font-size:1.1em;'>Panel administracyjny (Enterprise Preview)</b><br><br>
+            <div style='background: #33393f; color: #f2f2f2; border-radius: 10px; padding: 20px 18px; margin: 12px 0; box-shadow: 0 1px 4px #bdbdbd;'>
+                <b style='font-size:1.15em;'>Panel administracyjny (Enterprise Preview)</b><br><br>
                 <ul style='margin-top: 8px; margin-bottom: 0;'>
-                  <li><b>Statystyki użytkowników</b>: <span style='color:#1976d2;'>Wkrótce</span></li>
-                  <li><b>Zarządzanie kontami</b>: <span style='color:#1976d2;'>Wkrótce</span></li>
-                  <li><b>Eksport danych</b>: <span style='color:#1976d2;'>Wkrótce</span></li>
-                  <li><b>Logi aktywności i audyt</b>: <span style='color:#1976d2;'>Wkrótce</span></li>
-                  <li><b>Integracje SSO (Google, Microsoft, LDAP)</b>: <span style='color:#1976d2;'>Wkrótce</span></li>
-                  <li><b>API do integracji z zewnętrznymi systemami</b>: <span style='color:#1976d2;'>Wkrótce</span></li>
-                  <li><b>System zgłoszeń i wsparcia</b>: <span style='color:#1976d2;'>Wkrótce</span></li>
-                  <li><b>Pełna dokumentacja techniczna</b>: <span style='color:#1976d2;'>Wkrótce</span></li>
+                  <li><b>Statystyki użytkowników:</b> <span style='color:#ffb300;'>Wkrótce</span></li>
+                  <li><b>Zarządzanie kontami:</b> <span style='color:#ffb300;'>Wkrótce</span></li>
+                  <li><b>Eksport danych:</b> <span style='color:#ffb300;'>Wkrótce</span></li>
+                  <li><b>Logi aktywności i audyt:</b> <span style='color:#ffb300;'>Wkrótce</span></li>
+                  <li><b>Integracje SSO (Google, Microsoft, LDAP):</b> <span style='color:#ffb300;'>Wkrótce</span></li>
+                  <li><b>API do integracji z zewnętrznymi systemami:</b> <span style='color:#ffb300;'>Wkrótce</span></li>
+                  <li><b>System zgłoszeń i wsparcia:</b> <span style='color:#ffb300;'>Wkrótce</span></li>
+                  <li><b>Pełna dokumentacja techniczna:</b> <span style='color:#ffb300;'>Wkrótce</span></li>
                 </ul>
-                <hr style='margin:10px 0;'>
+                <hr style='margin:14px 0; border: none; border-top: 1px solid #555;'>
                 <b>Podstawowe informacje:</b><br>
                 <ul style='margin-top: 6px; margin-bottom: 0;'>
-                  <li><b>Liczba aktywnych użytkowników:</b> <span style='color:#888;'>demo</span></li>
+                  <li><b>Liczba aktywnych użytkowników:</b> <span style='color:#90caf9;'>demo</span></li>
                   <li><b>Wersja aplikacji:</b> 2.2.0</li>
                   <li><b>Data builda:</b> 16.06.2025</li>
-                  <li><b>Tryb:</b> <span style='color:#1976d2;'>Enterprise Preview</span></li>
+                  <li><b>Tryb:</b> <span style='color:#ffb300;'>Enterprise Preview</span></li>
                 </ul>
-                <hr style='margin:10px 0;'>
+                <hr style='margin:14px 0; border: none; border-top: 1px solid #555;'>
                 <b>Bezpieczeństwo i zgodność:</b><br>
                 <ul style='margin-top: 6px; margin-bottom: 0;'>
-                  <li>RODO/GDPR, FERPA, COPPA <span style='color:#1976d2;'>Ready</span></li>
-                  <li>Szyfrowanie danych <span style='color:#1976d2;'>Wkrótce</span></li>
-                  <li>Audyt logów <span style='color:#1976d2;'>Wkrótce</span></li>
-                  <li>Certyfikaty bezpieczeństwa <span style='color:#1976d2;'>Wkrótce</span></li>
+                  <li>RODO/GDPR, FERPA, COPPA <span style='color:#43e97b;'>Ready</span></li>
+                  <li>Szyfrowanie danych <span style='color:#ffb300;'>Wkrótce</span></li>
+                  <li>Audyt logów <span style='color:#ffb300;'>Wkrótce</span></li>
+                  <li>Certyfikaty bezpieczeństwa <span style='color:#ffb300;'>Wkrótce</span></li>
                 </ul>
-                <span style='font-size:0.95em;color:#888;'>To tylko podgląd funkcji enterprise. Skontaktuj się z administratorem, aby uzyskać dostęp do pełnej wersji.</span>
+                <hr style='margin:14px 0; border: none; border-top: 1px solid #555;'>
+                <span style='font-size:0.97em;color:#bbb;'>To tylko podgląd funkcji enterprise. Skontaktuj się z administratorem, aby uzyskać dostęp do pełnej wersji.</span>
             </div>
             """, unsafe_allow_html=True)
-        # FAQ wyśrodkowany względem sidebaru (poprawka)
+        # FAQ wyśrodkowany i na całą szerokość
         st.markdown("""
         <div style='display: flex; justify-content: center; align-items: center; width: 100%;'>
+        <div style='flex:1; max-width: 100%;'>
         """, unsafe_allow_html=True)
-        faq_clicked = st.button("FAQ / Jak to działa?", key="faq_btn_sidebar")
-        st.markdown("</div>", unsafe_allow_html=True)
+        faq_clicked = st.button("FAQ / Jak to działa?", key="faq_btn_sidebar", use_container_width=True)
+        st.markdown("</div></div>", unsafe_allow_html=True)
         if faq_clicked:
             st.session_state["show_faq"] = not st.session_state.get("show_faq", False)
         if st.session_state.get("show_faq", False):
