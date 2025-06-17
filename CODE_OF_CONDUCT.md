@@ -1,4 +1,4 @@
-# Kodeks Postępowania dla Współtwórców
+# Kodeks Postępowania dla Współtwórców (v2.3.0)
 
 ## 🤝 Nasze zobowiązanie
 
@@ -79,3 +79,5 @@ Dla odpowiedzi na często zadawane pytania dotyczące tego kodeksu postępowania
 ---
 
 **Pamiętaj**: Wszyscy w społeczności Sokratesa jesteśmy tutaj, aby uczyć się i rozwijać. Bądźmy dla siebie mili! 🧠❤️
+
+> To nowa wersja programu – pełna stabilność, czyste środowisko, gotowa do wdrożenia produkcyjnego!

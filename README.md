@@ -1,4 +1,4 @@
-# 🧠 Sokrates - Cyfrowy Nauczyciel AI
+# 🧠 Sokrates - Twój cyfrowy nauczyciel 🤖
 
 ![Python](https://img.shields.io/badge/python-v3.8+-blue.svg)
 ![Streamlit](https://img.shields.io/badge/streamlit-v1.28+-red.svg)
@@ -7,7 +7,7 @@
 
 > *"Wiem, że nic nie wiem"* - Sokrates
 
-Sokrates to inteligentna aplikacja nauczająca wykorzystująca metodę sokratejską. Zamiast podawać gotowe odpowiedzi, prowadzi uczniów do samodzielnego odkrywania wiedzy przez przemyślane pytania prowadzące.
+🧠 Sokrates - Twój cyfrowy nauczyciel 🤖 to inteligentna aplikacja nauczająca wykorzystująca metodę sokratejską. Zamiast podawać gotowe odpowiedzi, prowadzi uczniów do samodzielnego odkrywania wiedzy przez przemyślane pytania prowadzące.
 
 ## ✨ Funkcje
 
@@ -182,12 +182,39 @@ Ten projekt jest licencjonowany na licencji MIT - zobacz plik [LICENSE](LICENSE)
 
 ## 📊 Statystyki
 
-- **Wersja**: 2.2.0
+- **Wersja**: 2.3.0
 - **Status**: Produkcyjna
 - **Język**: Polski
 - **Framework**: Streamlit
 - **AI Model**: GPT-4o-mini
+- **Data wydania**: 17.06.2025
 
 ---
 
 > 💡 **Wskazówka**: Sokrates działa najlepiej gdy jesteś otwarty na myślenie i eksplorację! Nie bój się powiedzieć "nie wiem" - to właśnie napędza proces nauki.
+
+## 🏢 Enterprise Features (Preview)
+
+Aplikacja 🧠 Sokrates - Twój cyfrowy nauczyciel 🤖 jest rozwijana w kierunku wersji enterprise-ready. Planowane i wdrażane funkcje:
+
+- SSO (Single Sign-On): Google, Microsoft, LDAP, SAML
+- Zaawansowane zarządzanie użytkownikami i rolami
+- Szyfrowanie danych i audyt logów
+- Skalowalność (Docker, Kubernetes, bazy danych enterprise)
+- Integracje API, webhooki, eksport/import danych
+- Panel administracyjny i dashboard
+- System zgłoszeń i wsparcia technicznego
+- Zgodność z RODO/GDPR, FERPA, COPPA
+- Certyfikaty bezpieczeństwa
+
+### Roadmapa Enterprise
+
+- [ ] Panel administracyjny (zarządzanie użytkownikami, statystyki)
+- [ ] Eksport danych ucznia (JSON, CSV, PDF)
+- [ ] Logi aktywności i audyt
+- [ ] Integracja SSO (Google, Microsoft, LDAP)
+- [ ] API do integracji z zewnętrznymi systemami
+- [ ] System zgłoszeń i wsparcia
+- [ ] Pełna dokumentacja techniczna
+
+> Status: **Enterprise Preview** – funkcje wdrażane stopniowo. Zgłaszaj potrzeby przez GitHub Issues!

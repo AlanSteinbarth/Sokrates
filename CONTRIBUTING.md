@@ -1,4 +1,4 @@
-# 🤝 Przewodnik Współpracy - Sokrates
+# 🤝 Przewodnik Współpracy - 🧠 Sokrates - Twój cyfrowy nauczyciel 🤖 (v2.3.0)
 
 Dziękujemy za zainteresowanie współpracą przy projekcie Sokrates! Ten przewodnik pomoże Ci zacząć.
 
@@ -259,8 +259,9 @@ Zalecamy testowanie zmian na różnych systemach operacyjnych (np. przez WSL, VM
 
 ## ℹ️ Wersja i status
 
-- Aktualna wersja: 2.2.0 (16.06.2025)
+- Aktualna wersja: 2.3.0 (16.06.2025)
 - Status: produkcyjny, kod uporządkowany, pełna dokumentacja
+- To nowa wersja programu – pełna stabilność, czyste środowisko, gotowa do wdrożenia produkcyjnego!
 
 ## 🙏 Uznanie
 

@@ -1,6 +1,6 @@
 # Changelog
 
-Wszystkie istotne zmiany w projekcie Sokrates będą dokumentowane w tym pliku.
+Wszystkie istotne zmiany w projekcie 🧠 Sokrates - Twój cyfrowy nauczyciel 🤖 będą dokumentowane w tym pliku.
 
 Format oparty na [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 a projekt stosuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -16,6 +16,19 @@ a projekt stosuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Dodane
 - Test automatyczny `test_cross_os.py` sprawdzający kompatybilność z Windows, Linux, macOS
 - Dokumentacja: sekcja o kompatybilności systemowej i uruchamianiu testów cross-OS
+
+## [2.3.0] - 2025-06-17
+
+### Dodane
+- Wersja produkcyjna: czyste środowisko, usunięte logi i profile testowe
+- Spójna dokumentacja, aktualizacja wersji w README.md, CHANGELOG.md, app.py
+- Poprawki lintera, docstringi, porządek w kodzie
+- Ostateczne testy i przygotowanie do wdrożenia
+
+### Usunięte
+- Wszystkie pliki pamięci i logi testowe
+- Niepotrzebne katalogi cache
+- Placeholdery funkcji enterprise
 
 ## [2.2.0] - 2025-06-16
 

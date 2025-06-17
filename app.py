@@ -3,8 +3,9 @@
 # =============================================================================
 # Autor: Alan Steinbarth (alan.steinbarth@gmail.com)
 # GitHub: https://github.com/AlanSteinbarth/Sokrates
-# Wersja: 2.2.0
+# Wersja: 2.3.0
 # Licencja: MIT
+# Data wydania: 17.06.2025
 # 
 # Aplikacja wykorzystująca metodę sokratejską do nauczania przez pytania
 # prowadzące zamiast podawania gotowych odpowiedzi. Każdy uczeń ma 
@@ -28,13 +29,16 @@
 # Każda funkcja posiada docstring z opisem działania i argumentów.
 # =============================================================================
 
-# USUNIĘTO: import os, glob, pandas as pd
+# USUNIĘTO: import os
 import json
 from pathlib import Path
 import streamlit as st
 from openai import OpenAI
 from dotenv import dotenv_values
 from typing import List, Dict, Any
+import pandas as pd
+import zipfile
+import io
 
 # ===============================
 # INICJALIZACJA STANU SESJI (musi być tuż po importach!)
@@ -104,7 +108,7 @@ def verify_api_key(api_key: str) -> bool:
             messages=[{"role": "user", "content": "ping"}]
         )
         return bool(api_response.choices[0].message.content)
-    except (ValueError, KeyError, AttributeError, Exception) as e:
+    except (ValueError, KeyError, AttributeError) as e:
         st.error(f"Błąd weryfikacji klucza API: {e}")
         return False
 
@@ -167,8 +171,8 @@ def zapisz_do_pamieci(fact: str) -> None:
     memory_file = get_student_memory_file(st.session_state.get("student_name", ""))
     memory_file.parent.mkdir(exist_ok=True)
     
-    with open(memory_file, "a", encoding="utf-8") as f:
-        f.write(json.dumps({"fact": fact}, ensure_ascii=False) + "\n")
+    with open(memory_file, "a", encoding="utf-8") as f_mem:
+        f_mem.write(json.dumps({"fact": fact}, ensure_ascii=False) + "\n")
 
 def wczytaj_pamiec() -> List[str]:
     """
@@ -188,8 +192,8 @@ def wczytaj_pamiec() -> List[str]:
         return []
     
     try:
-        with open(memory_file, "r", encoding="utf-8") as f:
-            return [json.loads(line.strip())["fact"] for line in f.readlines() if line.strip()]
+        with open(memory_file, "r", encoding="utf-8") as f_mem:
+            return [json.loads(line.strip())["fact"] for line in f_mem.readlines() if line.strip()]
     except (json.JSONDecodeError, KeyError):
         return []
 
@@ -209,9 +213,9 @@ def zapisz_pamiec(fakty: List[str]) -> None:
     memory_file = get_student_memory_file(st.session_state.get("student_name", ""))
     memory_file.parent.mkdir(exist_ok=True)
     
-    with open(memory_file, "w", encoding="utf-8") as f:
+    with open(memory_file, "w", encoding="utf-8") as f_mem:
         for fact in fakty:
-            f.write(json.dumps({"fact": fact}, ensure_ascii=False) + "\n")
+            f_mem.write(json.dumps({"fact": fact}, ensure_ascii=False) + "\n")
 
 def usun_fact(index: int) -> None:
     """
@@ -268,7 +272,7 @@ Wypisz jako listę wypunktowaną, krótko i konkretnie."""},
         if content is None:
             return []
         return [line.strip() for line in content.split("\n") if line.strip()]
-    except (ValueError, KeyError, AttributeError, Exception) as e:
+    except (ValueError, KeyError, AttributeError) as e:
         st.error(f"Błąd podczas analizy tekstu: {e}")
         return []
 
@@ -345,7 +349,7 @@ Profil ucznia: {memory_context}
             "usage": getattr(chat_response, "usage", None),
             "raw": chat_response
         }
-    except (ValueError, KeyError, AttributeError, Exception) as e:
+    except (ValueError, KeyError, AttributeError) as e:
         st.error(f"Błąd podczas komunikacji z AI: {e}")
         return {"content": "", "usage": None, "raw": None}
 
@@ -421,79 +425,153 @@ with st.sidebar:
         <div style='display: flex; justify-content: center; align-items: center; width: 100%;'>
         <div style='flex:1; max-width: 100%;'>
         """, unsafe_allow_html=True)
-        admin_clicked = st.button("🛡️ Panel administracyjny (Enterprise Preview)", key="admin_btn_sidebar", use_container_width=True)
+        admin_clicked = st.button("🛡️ Panel administracyjny", key="admin_btn_sidebar", use_container_width=True)
         st.markdown("</div></div>", unsafe_allow_html=True)
         if admin_clicked:
             st.session_state["show_admin_panel"] = not st.session_state.get("show_admin_panel", False)
         if st.session_state.get("show_admin_panel", False):
-            st.markdown("""
+            # Statystyki użytkowników
+            students_dir_path = Path("db/students")
+            student_files = list(students_dir_path.glob("*_memory.json")) if students_dir_path.exists() else []
+            liczba_uczniow = len(student_files)
+            liczba_faktow = 0
+            for file in student_files:
+                try:
+                    with open(file, "r", encoding="utf-8") as f:
+                        liczba_faktow += sum(1 for _ in f)
+                except (OSError, ValueError, KeyError):
+                    pass
+            st.markdown(f"""
             <div style='background: #33393f; color: #f2f2f2; border-radius: 10px; padding: 20px 18px; margin: 12px 0; box-shadow: 0 1px 4px #bdbdbd;'>
-                <b style='font-size:1.15em;'>Panel administracyjny (Enterprise Preview)</b><br><br>
+                <b style='font-size:1.15em;'>Panel administracyjny</b><br><br>
+                <b>Statystyki użytkowników:</b><br>
                 <ul style='margin-top: 8px; margin-bottom: 0;'>
-                  <li><b>Statystyki użytkowników:</b> <span style='color:#ffb300;'>Wkrótce</span></li>
-                  <li><b>Zarządzanie kontami:</b> <span style='color:#ffb300;'>Wkrótce</span></li>
-                  <li><b>Eksport danych:</b> <span style='color:#ffb300;'>Wkrótce</span></li>
-                  <li><b>Logi aktywności i audyt:</b> <span style='color:#ffb300;'>Wkrótce</span></li>
-                  <li><b>Integracje SSO (Google, Microsoft, LDAP):</b> <span style='color:#ffb300;'>Wkrótce</span></li>
-                  <li><b>API do integracji z zewnętrznymi systemami:</b> <span style='color:#ffb300;'>Wkrótce</span></li>
-                  <li><b>System zgłoszeń i wsparcia:</b> <span style='color:#ffb300;'>Wkrótce</span></li>
-                  <li><b>Pełna dokumentacja techniczna:</b> <span style='color:#ffb300;'>Wkrótce</span></li>
+                  <li>Liczba unikalnych uczniów: <span style='color:#90caf9;'>{liczba_uczniow}</span></li>
+                  <li>Liczba profili (plików): <span style='color:#90caf9;'>{liczba_uczniow}</span></li>
+                  <li>Liczba wszystkich zapisanych faktów: <span style='color:#90caf9;'>{liczba_faktow}</span></li>
                 </ul>
                 <hr style='margin:14px 0; border: none; border-top: 1px solid #555;'>
+            """, unsafe_allow_html=True)
+            # Zarządzanie kontami
+            st.markdown("<b>Zarządzanie kontami:</b>", unsafe_allow_html=True)
+            if liczba_uczniow == 0:
+                st.info("Brak profili uczniów do wyświetlenia.")
+            else:
+                for file in student_files:
+                    name = file.stem.replace('_memory','').replace('_',' ').title()
+                    col1, col2 = st.columns([3,1])
+                    with col1:
+                        st.markdown(f"<span style='color:#90caf9;'>{name}</span>", unsafe_allow_html=True)
+                    with col2:
+                        if st.button("Usuń", key=f"usun_{file}"):
+                            file.unlink(missing_ok=True)
+                            st.success(f"Usunięto profil ucznia: {name}")
+                            st.rerun()
+            st.markdown("<hr style='margin:14px 0; border: none; border-top: 1px solid #555;'>", unsafe_allow_html=True)
+            # Eksport danych
+            st.markdown("<b>Eksport danych:</b>", unsafe_allow_html=True)
+            if liczba_uczniow == 0:
+                st.info("Brak profili do eksportu.")
+            else:
+                for file in student_files:
+                    name = file.stem.replace('_memory','').replace('_',' ').title()
+                    with open(file, "r", encoding="utf-8") as f:
+                        data = f.read()
+                    st.download_button(f"Pobierz profil {name}", data, file_name=f"{file.name}", mime="application/json", key=f"download_{file}")
+                # Eksport wszystkich profili naraz (ZIP)
+                if liczba_uczniow > 0:
+                    zip_buffer = io.BytesIO()
+                    with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zipf:
+                        for file in student_files:
+                            with open(file, "rb") as f:
+                                zipf.writestr(file.name, f.read())
+                    zip_buffer.seek(0)
+                    st.download_button(
+                        "Pobierz wszystkie profile (ZIP)",
+                        zip_buffer,
+                        file_name="wszystkie_profile.zip",
+                        mime="application/zip",
+                        key="download_all_zip"
+                    )
+            st.markdown("<hr style='margin:14px 0; border: none; border-top: 1px solid #555;'>", unsafe_allow_html=True)
+            # Logi aktywności i audyt (prosty log)
+            st.markdown("<b>Logi aktywności i audyt:</b>", unsafe_allow_html=True)
+            log_path = Path("db/activity.log")
+            if log_path.exists():
+                with open(log_path, "r", encoding="utf-8") as f:
+                    logs = f.readlines()[-10:]
+                for line in logs:
+                    st.markdown(f"<span style='font-size:0.95em;color:#bbb;'>{line.strip()}</span>", unsafe_allow_html=True)
+            else:
+                st.info("Brak logów aktywności.")
+            st.markdown("<hr style='margin:14px 0; border: none; border-top: 1px solid #555;'>", unsafe_allow_html=True)
+            # Usunięto placeholdery funkcji enterprise, które nie są jeszcze dostępne
+            st.markdown("""
+                <b>Pełna dokumentacja techniczna:</b> <a href='https://github.com/AlanSteinbarth/Sokrates#readme' style='color:#90caf9;' target='_blank'>Zobacz README</a>
+            """, unsafe_allow_html=True)
+            st.markdown("<hr style='margin:14px 0; border: none; border-top: 1px solid #555;'>", unsafe_allow_html=True)
+            # Podstawowe informacje
+            st.markdown("""
                 <b>Podstawowe informacje:</b><br>
                 <ul style='margin-top: 6px; margin-bottom: 0;'>
-                  <li><b>Liczba aktywnych użytkowników:</b> <span style='color:#90caf9;'>demo</span></li>
                   <li><b>Wersja aplikacji:</b> 2.2.0</li>
                   <li><b>Data builda:</b> 16.06.2025</li>
-                  <li><b>Tryb:</b> <span style='color:#ffb300;'>Enterprise Preview</span></li>
                 </ul>
-                <hr style='margin:14px 0; border: none; border-top: 1px solid #555;'>
+            """, unsafe_allow_html=True)
+            st.markdown("<hr style='margin:14px 0; border: none; border-top: 1px solid #555;'>", unsafe_allow_html=True)
+            # Bezpieczeństwo i zgodność
+            st.markdown("""
                 <b>Bezpieczeństwo i zgodność:</b><br>
                 <ul style='margin-top: 6px; margin-bottom: 0;'>
-                  <li>RODO/GDPR, FERPA, COPPA <span style='color:#43e97b;'>Ready</span></li>
-                  <li>Szyfrowanie danych <span style='color:#ffb300;'>Wkrótce</span></li>
-                  <li>Audyt logów <span style='color:#ffb300;'>Wkrótce</span></li>
-                  <li>Certyfikaty bezpieczeństwa <span style='color:#ffb300;'>Wkrótce</span></li>
+                  <li>RODO/GDPR, FERPA, COPPA</li>
                 </ul>
-                <hr style='margin:14px 0; border: none; border-top: 1px solid #555;'>
-                <span style='font-size:0.97em;color:#bbb;'>To tylko podgląd funkcji enterprise. Skontaktuj się z administratorem, aby uzyskać dostęp do pełnej wersji.</span>
-            </div>
             """, unsafe_allow_html=True)
-        # FAQ wyśrodkowany i na całą szerokość
-        st.markdown("""
-        <div style='display: flex; justify-content: center; align-items: center; width: 100%;'>
-        <div style='flex:1; max-width: 100%;'>
-        """, unsafe_allow_html=True)
-        faq_clicked = st.button("FAQ / Jak to działa?", key="faq_btn_sidebar", use_container_width=True)
-        st.markdown("</div></div>", unsafe_allow_html=True)
-        if faq_clicked:
-            st.session_state["show_faq"] = not st.session_state.get("show_faq", False)
-        if st.session_state.get("show_faq", False):
-            with st.expander("🤔 Jak działa metoda sokratejska?", expanded=True):
-                st.write("""
-                **Metoda sokratejska** to sposób uczenia przez zadawanie pytań prowadzących, zamiast podawania gotowych odpowiedzi.
-                1. Zadajesz pytanie Sokratesowi
-                2. Otrzymujesz pytania, które mają Cię naprowadzić na odpowiedź
-                3. Próbujesz odpowiadać na te pytania
-                4. Samodzielnie dochodzisz do rozwiązania!
-                """)
-            with st.expander("❓ Co oznacza 'nie wiem' i licznik?"):
-                st.write("""
-                **Licznik 'nie wiem'** to system pomocy:
-                - 0-2 razy: pytania prowadzące
-                - 3 razy: wskazówki i częściowe odpowiedzi
-                - 4+ razy: pełna odpowiedź z wyjaśnieniem
-                """)
-            with st.expander("👤 Co to jest profil ucznia?"):
-                st.write("""
-                **Profil ucznia** to Twoja osobista karta nauki, która zawiera:
-                - Poziom wiedzy
-                - Sposób, w jaki najlepiej się uczysz
-                - Trudności, z jakimi się zmagasz
-                - Postępy w nauce
-                - Zainteresowania naukowe
-                """)
-
+            st.markdown("<hr style='margin:14px 0; border: none; border-top: 1px solid #555;'>", unsafe_allow_html=True)
+            # Dashboard z wykresami (liczba uczniów, liczba faktów)
+            st.markdown("<b>Dashboard:</b>", unsafe_allow_html=True)
+            if liczba_uczniow > 0:
+                df = pd.DataFrame({
+                    "Uczeń": [file.stem.replace('_memory','').replace('_',' ').title() for file in student_files],
+                    "Fakty": [sum(1 for _ in open(file, "r", encoding="utf-8")) for file in student_files]
+                })
+                st.bar_chart(df.set_index("Uczeń"))
+            else:
+                st.info("Brak danych do wyświetlenia wykresu.")
+            st.markdown("<hr style='margin:14px 0; border: none; border-top: 1px solid #555;'>", unsafe_allow_html=True)
+            # System zgłoszeń i wsparcia (formularz kontaktowy)
+            st.markdown("<b>System zgłoszeń i wsparcia:</b>", unsafe_allow_html=True)
+            with st.form(key="support_form"):
+                zg_email = st.text_input("Twój email (opcjonalnie)")
+                zg_tresc = st.text_area("Opisz swój problem lub sugestię")
+                zg_submit = st.form_submit_button("Wyślij zgłoszenie")
+            if zg_submit and zg_tresc.strip():
+                with open("db/support_tickets.log", "a", encoding="utf-8") as f:
+                    f.write(f"Email: {zg_email}\nTreść: {zg_tresc}\n---\n")
+                st.success("Zgłoszenie zostało zapisane. Dziękujemy!")
+            st.markdown("<hr style='margin:14px 0; border: none; border-top: 1px solid #555;'>", unsafe_allow_html=True)
+            # Edycja profilu ucznia (podgląd i edycja faktów)
+            st.markdown("<b>Edycja profilu ucznia:</b>", unsafe_allow_html=True)
+            if liczba_uczniow == 0:
+                st.info("Brak profili do edycji.")
+            else:
+                for file in student_files:
+                    name = file.stem.replace('_memory','').replace('_',' ').title()
+                    with st.expander(f"Profil: {name}"):
+                        with open(file, "r", encoding="utf-8") as f:
+                            fakty_lista = [json.loads(line)["fact"] for line in f if line.strip()]
+                        for idx, fact_item in enumerate(fakty_lista):
+                            col1, col2 = st.columns([5,1])
+                            with col1:
+                                st.markdown(f"{fact_item}")
+                            with col2:
+                                if st.button("Usuń", key=f"usun_fact_{file}_{idx}"):
+                                    fakty_lista.pop(idx)
+                                    with open(file, "w", encoding="utf-8") as fw:
+                                        for fct in fakty_lista:
+                                            fw.write(json.dumps({"fact": fct}, ensure_ascii=False)+"\n")
+                                    st.success("Usunięto fakt.")
+                                    st.rerun()
+            st.markdown("<hr style='margin:14px 0; border: none; border-top: 1px solid #555;'>", unsafe_allow_html=True)
 # ===============================
 # BLOKADA FUNKCJI DO CZASU WERYFIKACJI KLUCZA
 # ===============================

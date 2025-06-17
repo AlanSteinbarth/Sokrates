@@ -1,6 +1,6 @@
 # Security Policy
 
-## 🔒 Zgłaszanie luk bezpieczeństwa
+## 🔒 Zgłaszanie luk bezpieczeństwa dla 🧠 Sokrates - Twój cyfrowy nauczyciel 🤖 (v2.3.0)
 
 Bezpieczeństwo Sokratesa i danych użytkowników to nasz priorytet. Jeśli odkryłeś lukę bezpieczeństwa, prosimy o odpowiedzialne zgłoszenie.
 
@@ -8,6 +8,7 @@ Bezpieczeństwo Sokratesa i danych użytkowników to nasz priorytet. Jeśli odkr
 
 | Wersja | Wsparcie         |
 | ------ | ---------------- |
+| 2.3.x  | ✅ Pełne wsparcie |
 | 2.0.x  | ✅ Pełne wsparcie |
 | 1.x.x  | ❌ Brak wsparcia  |
 
