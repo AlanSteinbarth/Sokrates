@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="Screenshots/Okładka_Sokrates.png" alt="Okładka projektu Sokrates" width="900"/>
+  <img src="Screenshots/okladka_sokrates.png" alt="Okładka projektu Sokrates" width="900"/>
 </p>
 
 # 🧠 Sokrates - Twój cyfrowy nauczyciel 🤖
