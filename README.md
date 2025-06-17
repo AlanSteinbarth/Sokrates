@@ -218,3 +218,35 @@ Aplikacja 🧠 Sokrates - Twój cyfrowy nauczyciel 🤖 jest rozwijana w kierunk
 - [ ] Pełna dokumentacja techniczna
 
 > Status: **Enterprise Preview** – funkcje wdrażane stopniowo. Zgłaszaj potrzeby przez GitHub Issues!
+
+## 🖼️ Przykładowe zrzuty ekranu
+
+<p align="center">
+  <img src="Screenshots/Zrzut%20ekranu%202025-06-17%20o%2022.45.50.png" alt="Ekran startowy aplikacji Sokrates" width="700"/>
+  <br><b>Ekran startowy aplikacji Sokrates</b>
+</p>
+
+<p align="center">
+  <img src="Screenshots/Zrzut%20ekranu%202025-06-17%20o%2022.46.22.png" alt="Logowanie ucznia i wybór imienia" width="700"/>
+  <br><b>Logowanie ucznia i wybór imienia</b>
+</p>
+
+<p align="center">
+  <img src="Screenshots/Zrzut%20ekranu%202025-06-17%20o%2022.46.42.png" alt="Czat z Sokratesem – pytania prowadzące" width="700"/>
+  <br><b>Czat z Sokratesem – pytania prowadzące</b>
+</p>
+
+<p align="center">
+  <img src="Screenshots/Zrzut%20ekranu%202025-06-17%20o%2022.48.05.png" alt="Panel administracyjny – statystyki uczniów" width="700"/>
+  <br><b>Panel administracyjny – statystyki uczniów</b>
+</p>
+
+<p align="center">
+  <img src="Screenshots/Zrzut%20ekranu%202025-06-17%20o%2022.48.30.png" alt="Edycja profilu ucznia" width="700"/>
+  <br><b>Edycja profilu ucznia</b>
+</p>
+
+<p align="center">
+  <img src="Screenshots/Zrzut%20ekranu%202025-06-17%20o%2022.49.51.png" alt="System zgłoszeń i wsparcia" width="700"/>
+  <br><b>System zgłoszeń i wsparcia</b>
+</p>
