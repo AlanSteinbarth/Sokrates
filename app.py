@@ -540,7 +540,7 @@ for msg in st.session_state["messages"]:
 
 # Pole do wpisania nowej wiadomości
 with st.form(key="chat_form", clear_on_submit=True):
-    user_input = st.text_area("Napisz swoją wiadomość do Sokratesa:", height=70, key="user_input")
+    user_input = st.text_area("Napisz czego będziesz się uczyć z Sokratesem:", height=70, key="user_input")
     submit = st.form_submit_button("Wyślij")
 
 # --- AKTUALIZACJA KOSZTU ROZMOWY ---
