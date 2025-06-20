@@ -8,10 +8,19 @@
 ![Streamlit](https://img.shields.io/badge/streamlit-v1.28+-red.svg)
 ![OpenAI](https://img.shields.io/badge/openai-gpt--4o--mini-green.svg)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Status](https://img.shields.io/badge/status-production-brightgreen.svg)
+![Commits](https://img.shields.io/github/commit-activity/m/AlanSteinbarth/Sokrates)
+![Last Commit](https://img.shields.io/github/last-commit/AlanSteinbarth/Sokrates)
 
 > *"Wiem, że nic nie wiem"* - Sokrates
 
 🧠 Sokrates - Twój cyfrowy nauczyciel 🤖 to inteligentna aplikacja nauczająca wykorzystująca metodę sokratejską. Zamiast podawać gotowe odpowiedzi, prowadzi uczniów do samodzielnego odkrywania wiedzy przez przemyślane pytania prowadzące.
+
+## 🎬 Demo & Live Preview
+
+- **🔗 Live Demo:** [Uruchom aplikację](http://localhost:8501) (po instalacji lokalnej)
+- **📺 Video Demo:** [Zobacz jak działa Sokrates](https://youtu.be/your-demo-video) *(dodaj link do wideo)*
+- **⚡ Quick Start:** Aplikacja gotowa w 2 minuty - zobacz [Szybki Start](#-szybki-start)
 
 ## ✨ Funkcje
 
@@ -109,16 +118,35 @@ Sokrates/
     └── conversations/    # Historia rozmów
 ```
 
+## 🏗️ Architektura Techniczna
+
+### Stack Technologiczny
+- **Frontend:** Streamlit (Python web framework)
+- **Backend:** Python 3.8+
+- **AI/ML:** OpenAI GPT-4o-mini API
+- **Data Storage:** JSON files (RODO-compliant)
+- **Environment:** Cross-platform (Windows, macOS, Linux)
+
+### Kluczowe Komponenty
+- **Socratic Engine:** Logika pytań prowadzących z progresywnym systemem pomocy
+- **Memory System:** Personalizacja na podstawie profilu ucznia
+- **Cost Tracker:** Monitoring kosztów API w czasie rzeczywistym
+- **Admin Panel:** Zarządzanie użytkownikami i statystyki
+
 ## 📑 Spis treści
+- [Demo & Live Preview](#-demo--live-preview)
 - [Funkcje](#-funkcje)
 - [Szybki Start](#-szybki-start)
 - [Jak używać](#-jak-używać)
+- [Architektura Techniczna](#️-architektura-techniczna)
 - [Konfiguracja](#-konfiguracja)
-- [Kompatybilność z systemami operacyjnymi](#-kompatybilność-z-systemami-operacyjnymi)
+- [Kompatybilność z systemami operacyjnymi](#️-kompatybilność-z-systemami-operacyjnymi)
 - [Prywatność i RODO](#-prywatność-i-rodo)
+- [Roadmapa Rozwoju](#-roadmapa-rozwoju)
+- [Zrzuty ekranu](#️-przykładowe-zrzuty-ekranu)
 - [Współpraca](#-współpraca)
 - [Licencja](#-licencja)
-- [Autor](#-autor)
+- [Autor](#️-autor)
 - [Podziękowania](#-podziękowania)
 - [Statystyki](#-statystyki)
 
@@ -197,31 +225,21 @@ Ten projekt jest licencjonowany na licencji MIT - zobacz plik [LICENSE](LICENSE)
 
 > 💡 **Wskazówka**: Sokrates działa najlepiej gdy jesteś otwarty na myślenie i eksplorację! Nie bój się powiedzieć "nie wiem" - to właśnie napędza proces nauki.
 
-## 🏢 Enterprise Features (Preview)
+## 🚀 Roadmapa Rozwoju
 
-Aplikacja 🧠 Sokrates - Twój cyfrowy nauczyciel 🤖 jest rozwijana w kierunku wersji enterprise-ready. Planowane i wdrażane funkcje:
+### Planowane Funkcje
+- [ ] Export profilu ucznia (JSON, CSV, PDF)
+- [ ] Dashboard z wykresami postępów
+- [ ] Tryb offline z podstawową funkcjonalnością  
+- [ ] API dla integracji z LMS
+- [ ] Wsparcie dla większej liczby modeli AI
+- [ ] Testy jednostkowe i integracyjne
 
-- SSO (Single Sign-On): Google, Microsoft, LDAP, SAML
-- Zaawansowane zarządzanie użytkownikami i rolami
-- Szyfrowanie danych i audyt logów
-- Skalowalność (Docker, Kubernetes, bazy danych enterprise)
-- Integracje API, webhooki, eksport/import danych
-- Panel administracyjny i dashboard
-- System zgłoszeń i wsparcia technicznego
-- Zgodność z RODO/GDPR, FERPA, COPPA
-- Certyfikaty bezpieczeństwa
-
-### Roadmapa Enterprise
-
-- [ ] Panel administracyjny (zarządzanie użytkownikami, statystyki)
-- [ ] Eksport danych ucznia (JSON, CSV, PDF)
-- [ ] Logi aktywności i audyt
-- [ ] Integracja SSO (Google, Microsoft, LDAP)
-- [ ] API do integracji z zewnętrznymi systemami
-- [ ] System zgłoszeń i wsparcia
-- [ ] Pełna dokumentacja techniczna
-
-> Status: **Enterprise Preview** – funkcje wdrażane stopniowo. Zgłaszaj potrzeby przez GitHub Issues!
+### Zrealizowane w v2.3.0
+- [x] ✅ Panel administracyjny z statystykami
+- [x] ✅ System zarządzania profilami uczniów
+- [x] ✅ Monitoring kosztów API
+- [x] ✅ Cross-platform compatibility
 
 ## 🖼️ Przykładowe zrzuty ekranu
 
