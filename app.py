@@ -64,6 +64,14 @@ get_state('show_admin_panel', False)
 # KONFIGURACJA APLIKACJI
 # =============================================================================
 
+# Konfiguracja sidebaru - domyślnie otwarty
+st.set_page_config(
+    page_title="🧠 Sokrates - Twój cyfrowy nauczyciel",
+    page_icon="🧠",
+    layout="wide",
+    initial_sidebar_state="expanded"  # "expanded" = otwarty, "collapsed" = zamknięty
+)
+
 # Cennik modeli OpenAI (USD za token)
 model_pricings = {
     "gpt-4o": {
