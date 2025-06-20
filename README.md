@@ -18,7 +18,7 @@
 
 ## 🎬 Demo & Live Preview
 
-<!-- - **🔗 Live Demo:** [Uruchom aplikację](http://localhost:8501) (po instalacji lokalnej) -->
+- **🔗 Live Demo:** [https://sokrates.streamlit.app/](https://sokrates.streamlit.app/)
 <!-- - **📺 Video Demo:** [Zobacz jak działa Sokrates](https://youtu.be/your-demo-video) *(dodaj link do wideo)* -->
 - **⚡ Quick Start:** Aplikacja gotowa w 2 minuty - zobacz [Szybki Start](#-szybki-start)
 
@@ -80,6 +80,8 @@ streamlit run app.py
 ```
 http://localhost:8501
 ```
+
+**Lub wypróbuj Live Demo:** [https://sokrates.streamlit.app/](https://sokrates.streamlit.app/)
 
 ## 🎓 Jak używać
 

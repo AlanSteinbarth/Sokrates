@@ -2,7 +2,10 @@
 
 ## Quick Deployment Options
 
-### Option 1: Local Development
+### Option 1: Try Live Demo
+**🚀 Fastest way to test:** [https://sokrates.streamlit.app/](https://sokrates.streamlit.app/)
+
+### Option 3: Local Development
 ```bash
 git clone https://github.com/AlanSteinbarth/Sokrates.git
 cd Sokrates
@@ -12,13 +15,13 @@ cp .env.example .env
 streamlit run app.py
 ```
 
-### Option 2: Docker (Coming Soon)
+### Option 4: Docker (Coming Soon)
 ```bash
 docker pull alansteinbarth/sokrates:latest
 docker run -p 8501:8501 -e OPENAI_API_KEY=your_key sokrates:latest
 ```
 
-### Option 3: Cloud Deployment
+### Option 5: Cloud Deployment
 
 #### Streamlit Cloud
 1. Fork this repository
